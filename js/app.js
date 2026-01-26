@@ -160,7 +160,12 @@ class App {
 
         if (fileInput) {
             fileInput.addEventListener('change', (e) => {
-                this.handleFiles(e.target.files);
+                // Immediately convert to array before FileList gets cleared (mobile Safari quirk)
+                const files = [];
+                for (let i = 0; i < e.target.files.length; i++) {
+                    files.push(e.target.files[i]);
+                }
+                this.handleFiles(files);
             });
         }
     }
@@ -193,7 +198,6 @@ class App {
             if (!file.name.toLowerCase().endsWith('.xml')) {
                 continue;
             }
-
             await this.processFile(file);
         }
 

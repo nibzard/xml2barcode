@@ -150,9 +150,23 @@
                 <a href="https://github.com/nikola/xml2barcode/issues" target="_blank" rel="noopener" data-i18n="reportIssue">Prijavi problem</a>
             </p>
         </footer>
+
+        <!-- Debug Panel -->
+        <div id="debugPanel" class="debug-panel hidden">
+            <div class="debug-header">
+                <span>🐛 Debug Console</span>
+                <div>
+                    <button id="debugCopy" class="debug-btn">📋 Copy</button>
+                    <button id="debugClear" class="debug-btn">Clear</button>
+                    <button id="debugClose" class="debug-btn">×</button>
+                </div>
+            </div>
+            <div id="debugLog" class="debug-log"></div>
+        </div>
     </div>
 
     <!-- Scripts -->
+    <script src="js/debug.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/storage.js"></script>
     <script src="js/xml-parser.js"></script>

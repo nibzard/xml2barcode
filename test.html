@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML2Barcode Tests</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background: #1b4d1b;
+            border-left: 4px solid #4caf50;
+        }
+        .fail {
+            background: #4d1b1b;
+            border-left: 4px solid #f44336;
+        }
+        .skip {
+            background: #2a2a2a;
+            border-left: 4px solid #6c757d;
+        }
+        .summary {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            z-index: 1000;
+        }
+        .summary.pass { background: #4caf50; color: white; }
+        .summary.fail { background: #f44336; color: white; }
+        .summary.running { background: #ff9800; color: white; }
+        .example {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        h1 { color: #fff; margin-bottom: 5px; }
+        p.subtitle { color: #adb5bd; margin-top: 0; }
+        h2 { color: #adb5bd; border-bottom: 1px solid #495057; padding-bottom: 10px; }
+        .details {
+            font-size: 12px;
+            color: #868e96;
+            margin-top: 5px;
+        }
+        .example h3 {
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>XML2Barcode Test Suite</h1>
+    <p class="subtitle">Testing against official Porezna uprava e-Račun examples</p>
+
+    <div id="summary" class="summary running">Running...</div>
+    <button id="copyBtn" style="position: fixed; top: 80px; right: 20px; padding: 10px 20px; background: #4caf50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; z-index: 999; display: none;" onclick="copyResults()">📋 Copy Results</button>
+    <div id="results"></div>
+
+    <!-- Load the app scripts first -->
+    <script src="js/i18n.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/xml-parser.js"></script>
+    <script src="js/hub3-generator.js"></script>
+    <script src="js/epc-generator.js"></script>
+
+    <script>
+        const examples = [
+            'Finalni racun-predujam.xml',
+            'Neoporezivi racun.xml',
+            'Odobrenje.xml',
+            'Racun za leasing PDV PPMV-aktivacija.xml',
+            'Racun za predujam.xml',
+            'Storno racuna za predujam-negativni racun.xml',
+            'Storno racuna za predujam-odobrenje.xml',
+            'eRacun-Nije u sustavu PDV.xml',
+            'eRacun-Oslobodjeno PDV.xml',
+            'eRacun-PDV-NEOP-POVRATNA-NAKNADA-stavka.xml',
+            'eRacun-PDV-NEOP-POVRATNA-NAKNADA-trosak.xml',
+            'eRacun-PDV-NEOP-PP-trosak.xml',
+            'eRacun-PDV0.xml',
+            'eRacun-PDV13.xml',
+            'eRacun-PDV25 i Neoporeziva naknada-trosak.xml',
+            'eRacun-PDV25-Obracun PDV po naplati.xml',
+            'eRacun-PDV25.xml',
+            'eRacun-PDV5.xml',
+            'eRacun-Poslovna jedinica.xml',
+            'eRacun-Prijenos porezne obveze.xml'
+        ];
+
+        let passed = 0;
+        let failed = 0;
+        let skipped = 0;
+
+        function assert(condition, message, details = '') {
+            if (condition) {
+                passed++;
+                return `<div class="test-result pass">✓ ${message}</div>`;
+            } else {
+                failed++;
+                return `<div class="test-result fail">✗ ${message}${details ? `<div class="details">${details}</div>` : ''}</div>`;
+            }
+        }
+
+        function skip(message) {
+            skipped++;
+            return `<div class="test-result skip">⊘ ${message}</div>`;
+        }
+
+        async function testExample(filename) {
+            let output = `<div class="example"><h3>${filename}</h3>`;
+
+            try {
+                // Fetch and parse XML
+                const response = await fetch(`./examples/${filename}`);
+                if (!response.ok) {
+                    output += `<div class="test-result fail">✗ Failed to fetch: ${response.status}</div></div>`;
+                    failed++;
+                    return output;
+                }
+
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+                // Check for XML parsing errors
+                const parseError = xmlDoc.querySelector('parsererror');
+                if (parseError) {
+                    output += `<div class="test-result fail">✗ XML parsing error</div></div>`;
+                    failed++;
+                    return output;
+                }
+
+                // Check if this is a CreditNote (not supported - only Invoice is)
+                const isCreditNote = xmlDoc.getElementsByTagName('CreditNote').length > 0 ||
+                                     xmlDoc.getElementsByTagNameNS('urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2', 'CreditNote').length > 0;
+
+                if (isCreditNote) {
+                    output += skip('CreditNote document (not an Invoice - not supported)');
+                    output += '</div>';
+                    return output;
+                }
+
+                // Test 1: Parse invoice using the app's parser
+                const xmlParser = new XMLParser();
+                const invoice = xmlParser.parse(xmlText);
+                output += assert(!!invoice, 'Parse invoice');
+
+                if (!invoice) {
+                    output += '</div>';
+                    return output;
+                }
+
+                // Test 2: Has IBAN
+                output += assert(!!invoice.iban, 'Has IBAN', invoice.iban || 'Missing');
+
+                // Test 3: Has amount
+                output += assert(!!invoice.amount, 'Has amount', invoice.amount || 'Missing');
+
+                // Test 4: Has currency
+                output += assert(!!invoice.currency, 'Has currency', invoice.currency || 'Missing');
+
+                // Test 5: Has supplier name
+                output += assert(!!invoice.supplierName, 'Has supplier name', invoice.supplierName || 'Missing');
+
+                // Test 6: HUB3 generation (only for HRK)
+                if (invoice.currency === 'HRK') {
+                    const hub3Gen = new HUB3Generator();
+                    const hub3Data = hub3Gen.formatPaymentString(invoice);
+                    output += assert(!!hub3Data, 'HUB3 data generated', hub3Data ? 'OK' : 'Failed');
+                } else if (invoice.currency === 'EUR') {
+                    output += skip('HUB3 skipped (EUR currency)');
+                } else {
+                    output += skip('HUB3 skipped (unknown currency)');
+                }
+
+                // Test 7: EPC generation
+                const epcGen = new EPCGenerator();
+                const epcData = epcGen.formatPaymentString(invoice);
+                output += assert(!!epcData, 'EPC data generated', epcData ? 'OK' : 'Failed');
+
+                // Test 8: Has reference for HRK
+                if (invoice.currency === 'HRK') {
+                    output += assert(!!invoice.paymentReference, 'Has payment reference (HRK)',
+                        invoice.paymentReference || 'Missing - may cause payment issues');
+                } else {
+                    output += skip('Payment reference not required (non-HRK)');
+                }
+
+            } catch (e) {
+                output += `<div class="test-result fail">✗ Exception: ${e.message}</div>`;
+                failed++;
+            }
+
+            output += '</div>';
+            return output;
+        }
+
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            const summaryDiv = document.getElementById('summary');
+
+            resultsDiv.innerHTML = '<p style="color: #adb5bd;">Loading and parsing XML files...</p>';
+
+            for (const example of examples) {
+                const result = await testExample(example);
+                resultsDiv.innerHTML += result;
+            }
+
+            // Update summary
+            const total = passed + failed + skipped;
+            if (failed === 0) {
+                summaryDiv.textContent = `✓ ${passed}/${total} passed`;
+                summaryDiv.className = 'summary pass';
+            } else {
+                summaryDiv.textContent = `✗ ${failed} failed, ${passed}/${total} passed`;
+                summaryDiv.className = 'summary fail';
+            }
+
+            // Show copy button
+            document.getElementById('copyBtn').style.display = 'block';
+        }
+
+        function copyResults() {
+            const resultsDiv = document.getElementById('results');
+            let text = `XML2Barcode Test Results\n`;
+            text += `========================\n`;
+            text += `${passed}/${passed + failed + skipped} tests passed\n\n`;
+
+            // Get all example results
+            const examples = resultsDiv.querySelectorAll('.example');
+            examples.forEach(ex => {
+                const title = ex.querySelector('h3').textContent;
+                text += `\n${title}\n`;
+                text += `${'='.repeat(title.length)}\n`;
+
+                const results = ex.querySelectorAll('.test-result');
+                results.forEach(r => {
+                    const text2 = r.textContent.trim();
+                    const icon = text2.startsWith('✓') ? 'PASS' : text2.startsWith('✗') ? 'FAIL' : 'SKIP';
+                    text += `[${icon}] ${text2.substring(1).trim()}\n`;
+                });
+            });
+
+            // Fallback for mobile browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = '📋 Copy Results', 2000);
+            } catch (err) {
+                alert('Copy failed. Please select and copy manually.');
+            }
+
+            document.body.removeChild(textarea);
+        }
+
+        // Run tests when page loads
+        runTests();
+    </script>
+</body>
+</html>

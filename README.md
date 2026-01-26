@@ -1,6 +1,6 @@
 # XML2Barcode - E-Račun u Bar Kod
 
-A 100% client-side web application that converts Croatian e-racun XML files into payment barcodes (HUB-3 PDF417 and EPC QR codes) for mobile banking payment scanning.
+[Live Demo](https://nibzard.github.io/xml2barcode/) · A 100% client-side web application that converts Croatian e-racun XML files into payment barcodes (HUB-3 PDF417 and EPC QR codes) for mobile banking payment scanning.
 
 ## Features
 

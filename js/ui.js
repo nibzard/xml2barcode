@@ -190,7 +190,15 @@ class UI {
         hub3Generator.render('hub3Barcode');
 
         // Show results section
-        document.getElementById('resultsSection').classList.remove('hidden');
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.classList.remove('hidden');
+
+        // Scroll to results on mobile - use setTimeout to ensure DOM is ready
+        if (window.innerWidth <= 640) {
+            setTimeout(() => {
+                resultsSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+            }, 100);
+        }
     }
 
     /**

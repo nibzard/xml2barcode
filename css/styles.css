@@ -548,6 +548,78 @@ body.drag-over .main {
     color: var(--text-muted);
 }
 
+/* ABOUTME: Debug Panel */
+.debug-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 200px;
+    background: #1a1a1a;
+    border-top: 2px solid #333;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+}
+
+.debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #252525;
+    border-bottom: 1px solid #333;
+}
+
+.debug-header span {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.debug-btn {
+    background: #333;
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 8px;
+}
+
+.debug-btn:hover {
+    background: #444;
+}
+
+.debug-log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    color: #0f0;
+    background: #0a0a0a;
+}
+
+.debug-log-entry {
+    padding: 2px 0;
+    border-bottom: 1px solid #222;
+}
+
+.debug-log-entry .timestamp {
+    color: #666;
+    margin-right: 8px;
+}
+
+.debug-log-entry.error {
+    color: #f66;
+}
+
+.debug-log-entry.warn {
+    color: #fc6;
+}
+
 /* ABOUTME: Print styles */
 @media print {
     .header,
