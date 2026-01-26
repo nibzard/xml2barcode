@@ -44,7 +44,9 @@ const translations = {
         processing: "Obrađujem...",
         noHistory: "Nema zadnjih računa",
         purposeDefault: "PLAĆANJE",
-        addMoreFiles: "+ Dodaj još datoteka"
+        addMoreFiles: "+ Dodaj još datoteka",
+        printSelected: "Ispiši odabrane",
+        newBatch: "Novo"
     },
     en: {
         subtitle: "E-Invoice to Barcode",
@@ -86,7 +88,9 @@ const translations = {
         processing: "Processing...",
         noHistory: "No recent invoices",
         purposeDefault: "PAYMENT",
-        addMoreFiles: "+ Add more files"
+        addMoreFiles: "+ Add more files",
+        printSelected: "Print Selected",
+        newBatch: "New"
     }
 };
 

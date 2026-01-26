@@ -126,11 +126,11 @@ class UI {
      * Print invoice button
      */
     setupPrintButton() {
-        const printBtn = document.getElementById('printInvoiceBtn');
+        const printBtn = document.getElementById('printSelectedBtn');
         if (!printBtn) return;
 
         printBtn.addEventListener('click', () => {
-            this.printInvoice();
+            this.printSelectedInvoices();
         });
     }
 
@@ -338,6 +338,101 @@ class UI {
 </html>
         `);
 
+        printWindow.document.close();
+    }
+
+    /**
+     * Print selected invoices with barcodes in 2-column grid
+     */
+    printSelectedInvoices() {
+        const selectedItems = storage.getSelectedItems();
+
+        if (selectedItems.length === 0) {
+            this.printInvoice();  // Fallback to single
+            return;
+        }
+
+        // Generate barcodes for selected items
+        const printItems = selectedItems.map(item => {
+            let barcodeDataUrl = null;
+            if (item.hub3String) {
+                try {
+                    const canvas = document.createElement('canvas');
+                    bwipjs.toCanvas(canvas, {
+                        bcid: 'pdf417', text: item.hub3String,
+                        scale: 2, height: 20, includetext: false,
+                        eclevel: 5, columns: 6, rows: 0
+                    });
+                    barcodeDataUrl = canvas.toDataURL('image/png');
+                } catch (e) { console.error('Barcode error:', e); }
+            }
+            return {
+                invoiceNumber: item.invoiceNumber,
+                supplierName: item.supplierName,
+                amount: item.amount, currency: item.currency,
+                barcodeDataUrl: barcodeDataUrl
+            };
+        }).filter(item => item.barcodeDataUrl);
+
+        if (printItems.length === 0) {
+            alert(i18n.currentLang === 'hr' ? 'Nema bar kodova' : 'No barcodes');
+            return;
+        }
+
+        // Open print window with grid layout
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) { alert('Popup blocked'); return; }
+
+        const lang = i18n.currentLang === 'hr' ? 'hr' : 'en';
+        const date = new Date().toLocaleDateString(lang === 'hr' ? 'hr-HR' : 'en-US');
+
+        printWindow.document.write(`<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+    <meta charset="UTF-8">
+    <title>${i18n.t('printSelected')} - ${printItems.length}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; padding: 1rem; color: #000; background: white; }
+        .print-header { text-align: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #000; }
+        .print-header h1 { font-size: 1.25rem; }
+        .print-header p { font-size: 0.875rem; color: #666; }
+        .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .print-item { border: 2px solid #000; padding: 0.75rem; page-break-inside: avoid; }
+        .print-item-header { display: flex; justify-content: space-between; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .print-item-supplier { font-size: 0.8rem; margin-bottom: 0.25rem; }
+        .print-item-amount { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .print-item-barcode { text-align: center; padding: 0.25rem; background: #f5f5f5; }
+        .print-item-barcode img { max-width: 100%; height: auto; }
+        @media print { .no-print { display: none; } body { padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="print-header">
+        <h1>${i18n.t('invoicesTitle')} - ${printItems.length}</h1>
+        <p>${date}</p>
+    </div>
+    <div class="print-grid">
+        ${printItems.map(item => `
+            <div class="print-item">
+                <div class="print-item-header">
+                    <span>${this.escapeHtml(item.invoiceNumber)}</span>
+                </div>
+                <div class="print-item-supplier">${this.escapeHtml(item.supplierName)}</div>
+                <div class="print-item-amount">${item.amount} ${item.currency}</div>
+                <div class="print-item-barcode">
+                    <img src="${item.barcodeDataUrl}" alt="HUB-3">
+                </div>
+            </div>
+        `).join('')}
+    </div>
+    <div class="no-print" style="text-align: center; margin-top: 2rem;">
+        <button onclick="window.print()" style="padding: 0.75rem 1.5rem; cursor: pointer;">
+            ${i18n.currentLang === 'hr' ? 'Ispiši' : 'Print'}
+        </button>
+    </div>
+</body>
+</html>`);
         printWindow.document.close();
     }
 
