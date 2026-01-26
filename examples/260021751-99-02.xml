@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<ubl:Invoice xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:sig="urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2" xmlns:hrextac="urn:mfin.gov.hr:schema:xsd:HRExtensionAggregateComponents-1" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:sac="urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:ubl="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+  <ext:UBLExtensions>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <hrextac:HRFISK20Data>
+          <hrextac:HRTaxTotal>
+            <cbc:TaxAmount currencyID="EUR">0</cbc:TaxAmount>
+            <hrextac:HRTaxSubtotal>
+              <cbc:TaxableAmount currencyID="EUR">285</cbc:TaxableAmount>
+              <cbc:TaxAmount currencyID="EUR">0</cbc:TaxAmount>
+              <hrextac:HRTaxCategory>
+                <cbc:ID>E</cbc:ID>
+                <cbc:Name>HR:E</cbc:Name>
+                <cbc:Percent>0</cbc:Percent>
+                <cbc:TaxExemptionReason>PDV nije obračunat u skladu s čl. 40 st. 1. toč. a) Zakona o porezu na dodanu vrijednost</cbc:TaxExemptionReason>
+                <hrextac:HRTaxScheme>
+                  <cbc:ID>VAT</cbc:ID>
+                </hrextac:HRTaxScheme>
+              </hrextac:HRTaxCategory>
+            </hrextac:HRTaxSubtotal>
+          </hrextac:HRTaxTotal>
+          <hrextac:HRLegalMonetaryTotal>
+            <cbc:TaxExclusiveAmount currencyID="EUR">285</cbc:TaxExclusiveAmount>
+            <hrextac:OutOfScopeOfVATAmount currencyID="EUR">0</hrextac:OutOfScopeOfVATAmount>
+          </hrextac:HRLegalMonetaryTotal>
+        </hrextac:HRFISK20Data>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+    <ext:UBLExtension>
+      <ext:ExtensionContent>
+        <sig:UBLDocumentSignatures>
+          <sac:SignatureInformation>
+            <ds:Signature Id="signature-f5db16d1-4c78-4732-ad90-117c24ceeb08" xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+              <ds:SignedInfo>
+                <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                <ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+                <ds:Reference URI="">
+                  <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+                  </ds:Transforms>
+                  <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                  <ds:DigestValue>RLzcNthbvVHIg1G31wBbC5aYWtdW1IV33P67iw/+xUM=</ds:DigestValue>
+                </ds:Reference>
+                <ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#signedproperties-d6174c7d-357e-4121-a12a-7aa15c0dd0ef">
+                  <ds:Transforms>
+                    <ds:Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                  </ds:Transforms>
+                  <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                  <ds:DigestValue>ixHloNjN1NQlhxCXIVAO8H2Nhr1C1kH0lHNeMjze2z8=</ds:DigestValue>
+                </ds:Reference>
+              </ds:SignedInfo>
+              <ds:SignatureValue>ReDOcbSs1qqfB6bqa56i6vF+mao3qX0tsCZy+5wLaPi4uRdmkOkdqMRyhX5RUSjbs//VemOZdbZHYnnPoDqvuQoBpvY92ga874GNUt5mtPrIL+Ww9l4sW9NEHIv5nW9hPgCp2xDCiOVJpbLpmXwAsNL7CKRFDsP33fN7OgVncpTKq7MBJpsDsABIWb0uA42CGce9Lnl/bORATFobfjYQgTV6N6IUsFAzK+Ubzaj9rdUOpd4cwsUUfcHHLmONxX8OW1/4P2t0HreYbcKhGmfQzoaof/LDH+I2mACMRben+dMqwQPNdU3i4WGmGE4RQrmgTNCaEtJEoaoUFXtFvWau6w==</ds:SignatureValue>
+              <ds:KeyInfo>
+                <ds:X509Data>
+                  <ds:X509Certificate>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</ds:X509Certificate>
+                </ds:X509Data>
+              </ds:KeyInfo>
+              <ds:Object>
+                <xades:QualifyingProperties Target="#signature-f5db16d1-4c78-4732-ad90-117c24ceeb08" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xades141="http://uri.etsi.org/01903/v1.4.1#">
+                  <xades:SignedProperties Id="signedproperties-d6174c7d-357e-4121-a12a-7aa15c0dd0ef">
+                    <xades:SignedSignatureProperties>
+                      <xades:SigningTime>2026-01-26T03:09:32.194+01:00</xades:SigningTime>
+                      <xades:SigningCertificate>
+                        <xades:Cert>
+                          <xades:CertDigest>
+                            <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                            <ds:DigestValue>VbV+4tIMjZ9/d8Mgvsd3p2MvCWEUu2DTY5ThsLXgtZo=</ds:DigestValue>
+                          </xades:CertDigest>
+                          <xades:IssuerSerial>
+                            <ds:X509IssuerName>cn=Fina RDC 2020,o=Financijska agencija,c=HR</ds:X509IssuerName>
+                            <ds:X509SerialNumber>20568013937393108095220231959012615780</ds:X509SerialNumber>
+                          </xades:IssuerSerial>
+                        </xades:Cert>
+                      </xades:SigningCertificate>
+                    </xades:SignedSignatureProperties>
+                  </xades:SignedProperties>
+                </xades:QualifyingProperties>
+              </ds:Object>
+            </ds:Signature>
+          </sac:SignatureInformation>
+        </sig:UBLDocumentSignatures>
+      </ext:ExtensionContent>
+    </ext:UBLExtension>
+  </ext:UBLExtensions>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.hr:cius-2025:1.0#conformant#urn:mfin.gov.hr:ext-2025:1.0</cbc:CustomizationID>
+  <cbc:ProfileID>P2</cbc:ProfileID>
+  <cbc:ID>260021751-99-02</cbc:ID>
+  <cbc:CopyIndicator>false</cbc:CopyIndicator>
+  <cbc:IssueDate>2026-01-23</cbc:IssueDate>
+  <cbc:IssueTime>23:10:33</cbc:IssueTime>
+  <cbc:DueDate>2026-02-09</cbc:DueDate>
+  <cbc:InvoiceTypeCode>575</cbc:InvoiceTypeCode>
+  <cbc:TaxPointDate>2026-01-23</cbc:TaxPointDate>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>2026-02-07</cbc:StartDate>
+    <cbc:EndDate>2027-02-07</cbc:EndDate>
+  </cac:InvoicePeriod>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="9934">26187994862</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID>9934:26187994862</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>Vatroslava Jagića 33</cbc:StreetName>
+        <cbc:CityName>Zagreb</cbc:CityName>
+        <cbc:PostalZone>10000</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>HR</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>HR26187994862</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>CROATIA OSIGURANJE D.D.</cbc:RegistrationName>
+        <cbc:CompanyLegalForm>CROATIA OSIGURANJE d.d., Zagreb, Vatroslava Jagića 33, 072 00 1884, T +385 01 633 2000, F +385 01 633 2020, www.crosig.hr, info@crosig.hr, Trgovački sud u Zagrebu, MBS 080051022, OIB 26187994862, Transakcijski račun - IBAN HR94 2340 0091 1005 5500 8, otvoren kod Privredne banke Zagreb d.d., Zagreb, Radnička cesta 50, BIC/SWIFT adresa PBZGHR2X, Temeljni kapital 79.923.642,00 EUR, uplaćen u cijelosti; broj dionica 429 697, nominalna vrijednost dionice 186,00 EUR, predsjednik Uprave Davor Tomašković, član Uprave Robert Vučković, članica Uprave Vesna Sanjković, član Uprave Luka Babić, predsjednik Nadzornog odbora Roberto Škopac</cbc:CompanyLegalForm>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>MIRELA BOROVAC</cbc:Name>
+        <cbc:Telephone>0914598598</cbc:Telephone>
+        <cbc:ElectronicMail>fakturiranje@crosig.hr</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+    <cac:SellerContact>
+      <cbc:ID>26187994862</cbc:ID>
+      <cbc:Name>99</cbc:Name>
+    </cac:SellerContact>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="9934">55950527428</cbc:EndpointID>
+      <cac:PartyIdentification>
+        <cbc:ID>9934:55950527428</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PostalAddress>
+        <cbc:StreetName>RUĐERA BOŠKOVIĆA 27</cbc:StreetName>
+        <cbc:CityName>SPLIT</cbc:CityName>
+        <cbc:PostalZone>21000</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>HR</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>HR55950527428</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>DISEQUI D.O.O.</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentID>HR01 79427-0269945262</cbc:PaymentID>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>HR8224020061400248939</cbc:ID>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
+  <cac:PaymentTerms>
+    <cbc:Note>Molimo Vas da prilikom uplate navedete model i poziv na broj primatelja.
+Ukoliko ste u međuvremenu račun podmirili, zanemarite ovaj poziv na uplatu.
+Za zakašnjelo plaćanje premije zaračunavamo zakonsku zateznu kamatu.
+U slučaju nastanka štetovnog događaja ovaj račun dospijeva na naplatu odmah.
+Obavještavamo Vas da, u slučaju neispunjenja dospjele novčane obveze, CROATIA osiguranje d.d. može zatražiti određivanje ovrhe na temelju vjerodostojne isprave.</cbc:Note>
+  </cac:PaymentTerms>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">0</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">285</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">0</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>E</cbc:ID>
+        <cbc:Percent>0</cbc:Percent>
+        <cbc:TaxExemptionReason>PDV nije obračunat u skladu s čl. 40 st. 1. toč. a) Zakona o porezu na dodanu vrijednost</cbc:TaxExemptionReason>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">285</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">285</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">285</cbc:TaxInclusiveAmount>
+    <cbc:PrepaidAmount currencyID="EUR">0</cbc:PrepaidAmount>
+    <cbc:PayableAmount currencyID="EUR">285</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:Note>2. OBROK</cbc:Note>
+    <cbc:InvoicedQuantity unitCode="E48">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">285</cbc:LineExtensionAmount>
+    <cac:InvoicePeriod>
+      <cbc:StartDate>2026-02-07</cbc:StartDate>
+      <cbc:EndDate>2027-02-07</cbc:EndDate>
+    </cac:InvoicePeriod>
+    <cac:Item>
+      <cbc:Description>206790181624</cbc:Description>
+      <cbc:Name>DZO, Broj police: 206790181624 2. OBROK 07.02.2026 - 07.02.2027</cbc:Name>
+      <cac:CommodityClassification>
+        <cbc:ItemClassificationCode listID="CG">65.12.12</cbc:ItemClassificationCode>
+      </cac:CommodityClassification>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>E</cbc:ID>
+        <cbc:Name>HR:E</cbc:Name>
+        <cbc:Percent>0</cbc:Percent>
+        <cbc:TaxExemptionReason>PDV nije obračunat u skladu s čl. 40 st. 1. toč. a) Zakona o porezu na dodanu vrijednost</cbc:TaxExemptionReason>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">285</cbc:PriceAmount>
+      <cbc:BaseQuantity>1</cbc:BaseQuantity>
+    </cac:Price>
+  </cac:InvoiceLine>
+</ubl:Invoice>

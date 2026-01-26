@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pretvori hrvatske e-račune u bar kodove za mobitel (HUB-3 PDF417 i EPC QR)">
+    <meta name="theme-color" content="#2563eb">
+    <title>XML2Barcode - E-Račun u Bar Kod</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
+
+    <!-- External Libraries (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.0.4/bwip-js-min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">📱 XML2Barcode</h1>
+                <p class="subtitle" data-i18n="subtitle">E-Račun u Bar Kod</p>
+            </div>
+            <div class="header-controls">
+                <button id="langToggle" class="icon-btn" aria-label="Toggle language">EN</button>
+                <button id="themeToggle" class="icon-btn" aria-label="Toggle theme">🌙</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <h2 data-i18n="dropZoneTitle">Povuci XML račun ovdje</h2>
+                        <p data-i18n="dropZoneSubtitle">ili kliknite za odabir datoteke</p>
+                        <input type="file" id="fileInput" accept=".xml" multiple hidden>
+                        <button class="btn primary" id="selectBtn" data-i18n="selectBtn">Odaberi datoteku</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Validation Messages -->
+            <div id="validationMessages" class="validation-messages hidden"></div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <!-- Invoice Summary -->
+                <div class="invoice-summary">
+                    <h3 data-i18n="invoiceSummary">Sažetak računa</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="label" data-i18n="invoiceNumber">Broj računa</span>
+                            <span id="invoiceNumber" class="value">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label" data-i18n="invoiceDate">Datum</span>
+                            <span id="invoiceDate" class="value">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="label" data-i18n="supplier">Primatelj</span>
+                            <span id="supplier" class="value">-</span>
+                        </div>
+                        <div class="summary-item highlight">
+                            <span class="label" data-i18n="amount">Iznos</span>
+                            <span id="amount" class="value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="payment-details">
+                    <h3 data-i18n="paymentDetails">Podaci za plaćanje</h3>
+                    <div class="details-grid">
+                        <div class="detail-item">
+                            <span class="label">IBAN</span>
+                            <span id="iban" class="value font-mono">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label" data-i18n="model">Model</span>
+                            <span id="model" class="value font-mono">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label" data-i18n="reference">Poziv na broj</span>
+                            <span id="reference" class="value font-mono">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="label" data-i18n="purpose">Svrha plaćanja</span>
+                            <span id="purpose" class="value">-</span>
+                        </div>
+                    </div>
+                    <button id="copyDetailsBtn" class="btn secondary" data-i18n="copyDetails">
+                        Kopiraj podatke
+                    </button>
+                </div>
+
+                <!-- Barcode Tabs -->
+                <div class="barcode-tabs">
+                    <button class="tab-btn active" data-tab="hub3" data-i18n="hub3Tab">HUB-3 (HRK)</button>
+                    <button class="tab-btn" data-tab="epc" data-i18n="epcTab">EPC QR (EUR)</button>
+                </div>
+
+                <!-- HUB-3 PDF417 -->
+                <div id="hub3Tab" class="tab-content active">
+                    <div class="barcode-container">
+                        <h3 data-i18n="hub3Title">HUB-3 PDF417 Bar Kod</h3>
+                        <p class="barcode-description" data-i18n="hub3Description">
+                            Za domaće plaćanje u HRK. Skenirajte s mobilnom bankarstvom.
+                        </p>
+                        <div id="hub3Barcode" class="barcode"></div>
+                        <div id="hub3String" class="barcode-string font-mono"></div>
+                        <div class="barcode-actions">
+                            <button id="downloadHub3Png" class="btn primary" data-i18n="downloadPng">Preuzmi PNG</button>
+                            <button id="printInvoiceBtn" class="btn secondary" data-i18n="printInvoice">Ispiši račun</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EPC QR Code -->
+                <div id="epcTab" class="tab-content">
+                    <div class="barcode-container">
+                        <h3 data-i18n="epcTitle">EPC QR Kod</h3>
+                        <p class="barcode-description" data-i18n="epcDescription">
+                            Za SEPA plaćanje u EUR. Skenirajte s mobilnom bankarstvom.
+                        </p>
+                        <div id="epcQrCode" class="qrcode"></div>
+                        <div id="epcString" class="barcode-string font-mono"></div>
+                        <div class="barcode-actions">
+                            <button id="downloadEpcPng" class="btn primary" data-i18n="downloadPng">Preuzmi PNG</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Invoices (Combined History + Batch) -->
+            <section id="invoicesSection" class="invoices-section hidden">
+                <div class="invoices-header">
+                    <h3 data-i18n="invoicesTitle">Povijest</h3>
+                    <button id="clearHistoryBtn" class="btn secondary small" data-i18n="clearHistory">Obriši</button>
+                </div>
+                <div id="invoicesList" class="invoices-list"></div>
+                <button id="downloadAllBtn" class="btn primary hidden" data-i18n="downloadAll">Preuzmi sve (ZIP)</button>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p data-i18n="footerText">
+                100% klijentska obrada. Vaši podaci ne napuštaju preglednik.
+            </p>
+            <p class="footer-links">
+                <a href="https://github.com/nikola/xml2barcode" target="_blank" rel="noopener">GitHub</a>
+                <span class="dot">·</span>
+                <a href="https://github.com/nikola/xml2barcode/issues" target="_blank" rel="noopener" data-i18n="reportIssue">Prijavi problem</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/xml-parser.js"></script>
+    <script src="js/hub3-generator.js"></script>
+    <script src="js/epc-generator.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('ServiceWorker registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
