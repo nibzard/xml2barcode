@@ -4,7 +4,7 @@
  */
 
 const FEATURE_FLAGS = {
-    ENABLE_EPC: false
+    ENABLE_EPC: true
 };
 
 class App {
@@ -14,6 +14,7 @@ class App {
     }
 
     init() {
+        debug.info('App', 'Initialized');
         this.setupFeatureFlags();
         this.setupDragAndDrop();
         this.setupFileInput();
@@ -165,6 +166,7 @@ class App {
                 for (let i = 0; i < e.target.files.length; i++) {
                     files.push(e.target.files[i]);
                 }
+                debug.info('FileInput', 'Selected: ' + files.length + ' files');
                 this.handleFiles(files);
             });
         }
@@ -182,6 +184,7 @@ class App {
       * Handle selected/dropped files
       */
     async handleFiles(files) {
+        debug.info('HandleFiles', 'Processing ' + files.length + ' files');
         if (!files || files.length === 0) return;
 
         ui.clearErrors();
@@ -194,12 +197,24 @@ class App {
         }
 
         // Process all files (single or batch - same logic)
+        let successCount = 0;
+        let errorCount = 0;
         for (const file of files) {
+            debug.info('HandleFiles', 'Processing: ' + file.name);
             if (!file.name.toLowerCase().endsWith('.xml')) {
+                debug.warn('HandleFiles', 'Skipped (not XML): ' + file.name);
                 continue;
             }
-            await this.processFile(file);
+
+            const success = await this.processFile(file);
+            if (success) {
+                successCount++;
+            } else {
+                errorCount++;
+            }
         }
+
+        debug.info('HandleFiles', 'Complete: ' + successCount + ' success, ' + errorCount + ' errors');
 
         // Hide dropZone, show add more button
         this.toggleDropZone(false);
@@ -214,15 +229,20 @@ class App {
     async processFile(file) {
         // Validate file type
         if (!file.name.toLowerCase().endsWith('.xml')) {
-            ui.showError(i18n.t('errorInvalidXml'));
-            return;
+            ui.showError(`${file.name}: ${i18n.t('errorInvalidXml')}`);
+            return false;
         }
 
         ui.showLoading();
+        debug.info('ProcessFile', 'Starting: ' + file.name);
 
         try {
+            debug.info('ProcessFile', 'Reading file...');
             const content = await this.readFile(file);
+
+            debug.info('ProcessFile', 'Parsing XML...');
             const invoiceData = xmlParser.parse(content);
+            debug.info('ProcessFile', 'Parsed: ' + (invoiceData?.invoiceNumber || 'unknown') + ' | ' + (invoiceData?.amount || '0') + ' ' + (invoiceData?.currency || ''));
 
             // Generate HUB3 and capture string
             const hub3 = hub3Generator.generate(invoiceData);
@@ -230,21 +250,27 @@ class App {
 
             // Add to storage
             storage.add(invoiceData, hub3String, null);
+            debug.info('ProcessFile', 'Added to history');
 
             // Show first invoice in UI
             if (!this.hasDisplayed) {
                 ui.displayInvoiceData(invoiceData);
                 this.hasDisplayed = true;
+                debug.info('ProcessFile', 'Displayed in UI');
             }
+            return true;  // Success
         } catch (error) {
             console.error('Error processing file:', error);
-            ui.showError(error.message || i18n.t('errorInvalidXml'));
+            debug.error('ProcessFile', 'Error: ' + error.message);
+            // Clear current display if showing previous file's data
+            if (this.hasDisplayed) {
+                ui.clearCurrentDisplay();
+            }
+            ui.showError(`${file.name}: ${error.message || i18n.t('errorInvalidXml')}`);
+            return false;  // Failure
         } finally {
             ui.hideLoading();
         }
-
-        // Re-render invoices list
-        this.renderInvoicesList();
     }
 
     /**

@@ -413,6 +413,9 @@ body.drag-over .main {
 .qrcode img {
     max-width: 100%;
     height: auto;
+    background: #fff;
+    padding: 0.5rem;
+    border-radius: 4px;
 }
 
 .barcode-string {

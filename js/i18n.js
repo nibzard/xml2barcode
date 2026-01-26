@@ -22,7 +22,7 @@ const translations = {
         hub3Tab: "HUB-3 (HRK)",
         epcTab: "EPC QR (EUR)",
         hub3Title: "HUB-3 PDF417 Bar Kod",
-        hub3Description: "Za domaće plaćanje u HRK. Skenirajte s mobilnom bankarstvom.",
+        hub3Description: "Skenirajte s mobilnom bankarstvom.",
         epcTitle: "EPC QR Kod",
         epcDescription: "Za SEPA plaćanje u EUR. Skenirajte s mobilnom bankarstvom.",
         downloadPng: "Preuzmi PNG",

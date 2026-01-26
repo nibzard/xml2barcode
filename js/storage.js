@@ -4,7 +4,7 @@
  */
 
 const STORAGE_KEY = 'xml2barcode-history';
-const MAX_HISTORY_ITEMS = 10;
+const MAX_HISTORY_ITEMS = 20;
 
 class Storage {
     constructor() {
@@ -50,8 +50,13 @@ class Storage {
 
         console.log('Creating history item:', historyItem);
 
-        // Remove duplicates with same invoice number
-        this.history = this.history.filter(item => item.invoiceNumber !== historyItem.invoiceNumber);
+        // Remove exact duplicates (same invoice number, supplier, AND amount)
+        // Allow different invoices to coexist even if they have same invoice number
+        this.history = this.history.filter(item =>
+            !(item.invoiceNumber === historyItem.invoiceNumber &&
+              item.supplierName === historyItem.supplierName &&
+              item.amount === historyItem.amount)
+        );
 
         // Add new item at the beginning
         this.history.unshift(historyItem);

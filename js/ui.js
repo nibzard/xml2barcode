@@ -192,11 +192,13 @@ class UI {
         // Show results section
         const resultsSection = document.getElementById('resultsSection');
         resultsSection.classList.remove('hidden');
+        debug.info('Display', 'Showing results: ' + data.invoiceNumber);
 
         // Scroll to results on mobile - use setTimeout to ensure DOM is ready
         if (window.innerWidth <= 640) {
             setTimeout(() => {
                 resultsSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+                debug.info('Display', 'Scrolled to results');
             }, 100);
         }
     }
@@ -371,6 +373,18 @@ class UI {
     clearErrors() {
         const validationContainer = document.getElementById('validationMessages');
         validationContainer.classList.add('hidden');
+    }
+
+    /**
+     * Clear current invoice display (used when next file fails)
+     */
+    clearCurrentDisplay() {
+        const resultsSection = document.getElementById('resultsSection');
+        const barcodeContainer = document.getElementById('hub3Barcode');
+
+        if (barcodeContainer) {
+            barcodeContainer.innerHTML = '';
+        }
     }
 
     /**
