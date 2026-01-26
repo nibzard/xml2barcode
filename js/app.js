@@ -282,7 +282,7 @@ class App {
       * Render unified invoices list
       */
     renderInvoicesList() {
-        storage.renderInvoicesList((item) => ui.loadInvoiceFromHistory(item));
+        storage.renderInvoicesList();
     }
 
     /**

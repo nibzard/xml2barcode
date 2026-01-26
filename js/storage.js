@@ -101,78 +101,11 @@ class Storage {
         invoicesSection.classList.remove('hidden');
         downloadAllBtn.classList.remove('hidden');
 
-        return `
-                <div class="invoices-item" data-id="${item.id}">
-                    <div class="invoices-item-info">
-                        <div class="invoices-item-title">${this.escapeHtml(item.invoiceNumber)}</div>
-                        <div class="invoices-item-subtitle">${this.escapeHtml(item.supplier)} · ${item.amount} ${item.currency}</div>
-                    </div>
-                    <div class="invoices-item-actions">
-                        ${hub3BtnHtml}
-                        ${epcBtnHtml}
-                        <button class="invoices-item-delete" data-delete-id="${item.id}" aria-label="Delete">×</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Add click handlers for delete buttons
-        invoicesList.querySelectorAll('.invoices-item-delete').forEach(el => {
-            el.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const id = el.getAttribute('data-delete-id');
-                this.remove(id);
-                this.renderInvoicesList(onItemClick, onDownloadClick);
-            });
-        });
-
-        // Add click handlers for invoice items (but not for download buttons - they'll be handled after render)
-        invoicesList.querySelectorAll('.invoices-item').forEach(el => {
-            el.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('invoices-item-delete') && !e.target.closest('.invoices-item-actions')) {
-                    const id = el.getAttribute('data-id');
-                    const item = this.get(id);
-                    if (item && onItemClick) {
-                        onItemClick(item);
-                    }
-                }
-            });
-        });
-
-        // Add click handlers for download buttons
-        invoicesList.querySelectorAll('.invoices-item-actions .btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const invoiceItemEl = btn.closest('.invoices-item');
-                const id = invoiceItemEl.getAttribute('data-id');
-                const item = this.get(id);
-                const type = btn.textContent === 'HUB-3' ? 'hub3' : 'epc';
-
-                // Get data URL from stored item
-                const dataUrl = type === 'hub3' ? item.hub3DataUrl : item.epcDataUrl;
-
-                if (dataUrl) {
-                    const link = document.createElement('a');
-                    link.download = `${item.invoiceNumber || 'invoice'}-${type}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                }
-            });
-        });
-    }
-
-        // Show the invoices section and download all button
-        invoicesSection.classList.remove('hidden');
-        downloadAllBtn.classList.remove('hidden');
+        // Generate download buttons HTML
+        const hub3BtnHtml = '<button class="btn secondary small" data-download-type="hub3">HUB-3</button>';
+        const epcBtnHtml = '<button class="btn secondary small" data-download-type="epc">EPC</button>';
 
         invoicesList.innerHTML = this.history.map(item => {
-            const date = new Date(item.timestamp);
-            const formattedDate = date.toLocaleDateString(i18n.currentLang === 'hr' ? 'hr-HR' : 'en-US', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-
             return `
                 <div class="invoices-item" data-id="${item.id}">
                     <div class="invoices-item-info">
@@ -194,19 +127,40 @@ class Storage {
                 e.stopPropagation();
                 const id = el.getAttribute('data-delete-id');
                 this.remove(id);
-                this.renderInvoicesList(onItemClick, onDownloadClick);
+                this.renderInvoicesList();
             });
         });
 
         // Add click handlers for invoice items
         invoicesList.querySelectorAll('.invoices-item').forEach(el => {
             el.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('invoices-item-delete') && !e.target.classList.contains('btn')) {
+                if (!e.target.classList.contains('invoices-item-delete') && !e.target.closest('.invoices-item-actions')) {
                     const id = el.getAttribute('data-id');
                     const item = this.get(id);
-                    if (item && onItemClick) {
-                        onItemClick(item);
+                    if (item) {
+                        ui.loadInvoiceFromHistory(item);
                     }
+                }
+            });
+        });
+
+        // Add click handlers for download buttons
+        invoicesList.querySelectorAll('.invoices-item-actions .btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const invoiceItemEl = btn.closest('.invoices-item');
+                const id = invoiceItemEl.getAttribute('data-id');
+                const item = this.get(id);
+                const type = btn.getAttribute('data-download-type');
+
+                // Get data URL from stored item
+                const dataUrl = type === 'hub3' ? item.hub3DataUrl : item.epcDataUrl;
+
+                if (dataUrl) {
+                    const link = document.createElement('a');
+                    link.download = `${item.invoiceNumber || 'invoice'}-${type}.png`;
+                    link.href = dataUrl;
+                    link.click();
                 }
             });
         });

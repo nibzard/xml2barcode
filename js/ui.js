@@ -211,31 +211,7 @@ class UI {
       * Render invoices list
       */
     renderInvoicesList() {
-        storage.renderInvoicesList((item) => this.loadInvoiceFromHistory(item), (item, type, isDownload = false) => {
-            const downloadBtnHtml = `
-                <button class="btn secondary small" data-download-type="${type}">
-                    ${type === 'hub3' ? 'HUB-3' : 'EPC'}
-                </button>
-            `;
-
-            return downloadBtnHtml;
-        });
-
-        // Add click handlers for download buttons
-        setTimeout(() => {
-            document.querySelectorAll('.invoices-item-actions .btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const invoiceItemEl = btn.closest('.invoices-item');
-                    const id = invoiceItemEl.getAttribute('data-id');
-                    const item = storage.get(id);
-                    const type = btn.getAttribute('data-download-type');
-                    if (item) {
-                        this.downloadItem(item, type);
-                    }
-                });
-            });
-        }, 0);
+        storage.renderInvoicesList((item) => this.loadInvoiceFromHistory(item));
     }
 
     /**
