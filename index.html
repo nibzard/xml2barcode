@@ -11,10 +11,10 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>">
 
-    <!-- External Libraries (CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bwip-js/3.0.4/bwip-js-min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <!-- External Libraries (local) -->
+    <script src="lib/qrcode.min.js"></script>
+    <script src="lib/bwip-js-min.js"></script>
+    <script src="lib/jszip.min.js"></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="css/styles.css">
@@ -48,6 +48,9 @@
                         <button class="btn primary" id="selectBtn" data-i18n="selectBtn">Odaberi datoteku</button>
                     </div>
                 </div>
+                <button id="addMoreBtn" class="btn secondary compact hidden" data-i18n="addMoreFiles">
+                    + Dodaj još datoteka
+                </button>
             </section>
 
             <!-- Validation Messages -->
@@ -107,7 +110,6 @@
                 <!-- Barcode Tabs -->
                 <div class="barcode-tabs">
                     <button class="tab-btn active" data-tab="hub3" data-i18n="hub3Tab">HUB-3 (HRK)</button>
-                    <button class="tab-btn" data-tab="epc" data-i18n="epcTab">EPC QR (EUR)</button>
                 </div>
 
                 <!-- HUB-3 PDF417 -->
@@ -118,25 +120,9 @@
                             Za domaće plaćanje u HRK. Skenirajte s mobilnom bankarstvom.
                         </p>
                         <div id="hub3Barcode" class="barcode"></div>
-                        <div id="hub3String" class="barcode-string font-mono"></div>
                         <div class="barcode-actions">
                             <button id="downloadHub3Png" class="btn primary" data-i18n="downloadPng">Preuzmi PNG</button>
                             <button id="printInvoiceBtn" class="btn secondary" data-i18n="printInvoice">Ispiši račun</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- EPC QR Code -->
-                <div id="epcTab" class="tab-content">
-                    <div class="barcode-container">
-                        <h3 data-i18n="epcTitle">EPC QR Kod</h3>
-                        <p class="barcode-description" data-i18n="epcDescription">
-                            Za SEPA plaćanje u EUR. Skenirajte s mobilnom bankarstvom.
-                        </p>
-                        <div id="epcQrCode" class="qrcode"></div>
-                        <div id="epcString" class="barcode-string font-mono"></div>
-                        <div class="barcode-actions">
-                            <button id="downloadEpcPng" class="btn primary" data-i18n="downloadPng">Preuzmi PNG</button>
                         </div>
                     </div>
                 </div>
@@ -179,7 +165,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js')
                     .then((registration) => {
                         console.log('ServiceWorker registered:', registration.scope);
                     })

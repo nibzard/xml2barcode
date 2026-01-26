@@ -133,12 +133,15 @@ body {
 /* ABOUTME: Upload section */
 .upload-section {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 .drop-zone {
     border: 2px dashed var(--border);
     border-radius: var(--radius-lg);
-    padding: 3rem 2rem;
+    padding: 2rem;
     text-align: center;
     background: var(--bg-primary);
     transition: all 0.3s;
@@ -155,23 +158,42 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .upload-icon {
-    width: 4rem;
-    height: 4rem;
+    width: 3rem;
+    height: 3rem;
     color: var(--text-muted);
 }
 
 .drop-zone h2 {
-    font-size: 1.25rem;
+    font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
 }
 
 .drop-zone p {
     color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.drop-zone.hidden {
+    display: none;
+}
+
+.btn.compact {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    align-self: flex-start;
+}
+
+/* ABOUTME: Page-wide dropzone indicator */
+body.drag-over .main {
+    border: 3px dashed var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    background: rgba(37, 99, 235, 0.05);
 }
 
 /* ABOUTME: Buttons */
@@ -565,7 +587,11 @@ body {
     }
 
     .drop-zone {
-        padding: 2rem 1rem;
+        padding: 1.5rem 1rem;
+    }
+
+    .drop-zone h2 {
+        font-size: 0.875rem;
     }
 
     .summary-grid,
@@ -596,12 +622,12 @@ body {
         width: 100%;
     }
 
-    .voices-item {
+    .invoices-item {
         flex-direction: column;
         align-items: flex-start;
     }
 
-    .voices-item-actions {
+    .invoices-item-actions {
         width: 100%;
         justify-content: flex-end;
     }

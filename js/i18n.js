@@ -34,6 +34,7 @@ const translations = {
         footerText: "100% klijentska obrada. Vaši podaci ne napuštaju preglednik.",
         reportIssue: "Prijavi problem",
         errorInvalidXml: "Neispravan XML format. Molim vas učitajte valjani e-račun.",
+        errorLibraryNotLoaded: "PDF417 biblioteka nije učitana. Bar kod se neće prikazati, ali su podaci ispravni.",
         errorMissingFields: "Nedostaju obavezna polja:",
         warningMissingIban: "Nedostaje IBAN",
         warningMissingAmount: "Nedostaje iznos",
@@ -42,7 +43,8 @@ const translations = {
         copied: "Kopirano!",
         processing: "Obrađujem...",
         noHistory: "Nema zadnjih računa",
-        purposeDefault: "PLAĆANJE"
+        purposeDefault: "PLAĆANJE",
+        addMoreFiles: "+ Dodaj još datoteka"
     },
     en: {
         subtitle: "E-Invoice to Barcode",
@@ -74,6 +76,7 @@ const translations = {
         footerText: "100% client-side processing. Your data never leaves the browser.",
         reportIssue: "Report Issue",
         errorInvalidXml: "Invalid XML format. Please upload a valid e-invoice.",
+        errorLibraryNotLoaded: "PDF417 library not loaded. Barcode will not display, but data is correct.",
         errorMissingFields: "Missing required fields:",
         warningMissingIban: "Missing IBAN",
         warningMissingAmount: "Missing amount",
@@ -81,7 +84,9 @@ const translations = {
         warningDefaultedModel: "Payment model defaulted to HR00. Please verify your invoice.",
         copied: "Copied!",
         processing: "Processing...",
-        purposeDefault: "PAYMENT"
+        noHistory: "No recent invoices",
+        purposeDefault: "PAYMENT",
+        addMoreFiles: "+ Add more files"
     }
 };
 

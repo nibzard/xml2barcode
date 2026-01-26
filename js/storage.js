@@ -29,13 +29,12 @@ class Storage {
         }
     }
 
-    add(invoiceData, hub3DataUrl = null, epcDataUrl = null) {
+    add(invoiceData, hub3String = null) {
         console.log('storage.add() called with:', invoiceData);
         const historyItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
             invoiceNumber: invoiceData.invoiceNumber || 'N/A',
-            supplier: invoiceData.supplierName || 'N/A',
             supplierName: invoiceData.supplierName || 'N/A',
             amount: invoiceData.amount || '0',
             currency: invoiceData.currency || 'EUR',
@@ -46,8 +45,7 @@ class Storage {
             invoiceDate: invoiceData.invoiceDate || '',
             dueDate: invoiceData.dueDate || '',
             warnings: invoiceData.warnings || [],
-            hub3DataUrl: hub3DataUrl,
-            epcDataUrl: epcDataUrl
+            hub3String: hub3String
         };
 
         console.log('Creating history item:', historyItem);
@@ -103,18 +101,16 @@ class Storage {
 
         // Generate download buttons HTML
         const hub3BtnHtml = '<button class="btn secondary small" data-download-type="hub3">HUB-3</button>';
-        const epcBtnHtml = '<button class="btn secondary small" data-download-type="epc">EPC</button>';
 
         invoicesList.innerHTML = this.history.map(item => {
             return `
                 <div class="invoices-item" data-id="${item.id}">
                     <div class="invoices-item-info">
                         <div class="invoices-item-title">${this.escapeHtml(item.invoiceNumber)}</div>
-                        <div class="invoices-item-subtitle">${this.escapeHtml(item.supplier)} · ${item.amount} ${item.currency}</div>
+                        <div class="invoices-item-subtitle">${this.escapeHtml(item.supplierName)} · ${item.amount} ${item.currency}</div>
                     </div>
                     <div class="invoices-item-actions">
                         ${hub3BtnHtml}
-                        ${epcBtnHtml}
                         <button class="invoices-item-delete" data-delete-id="${item.id}" aria-label="Delete">×</button>
                     </div>
                 </div>
@@ -151,19 +147,42 @@ class Storage {
                 const invoiceItemEl = btn.closest('.invoices-item');
                 const id = invoiceItemEl.getAttribute('data-id');
                 const item = this.get(id);
-                const type = btn.getAttribute('data-download-type');
 
-                // Get data URL from stored item
-                const dataUrl = type === 'hub3' ? item.hub3DataUrl : item.epcDataUrl;
-
-                if (dataUrl) {
-                    const link = document.createElement('a');
-                    link.download = `${item.invoiceNumber || 'invoice'}-${type}.png`;
-                    link.href = dataUrl;
-                    link.click();
+                // Generate PNG on-demand from stored string
+                if (item.hub3String) {
+                    this.generateHub3AndDownload(item.hub3String, item.invoiceNumber || 'invoice');
                 }
             });
         });
+    }
+
+    generateHub3AndDownload(string, invoiceNumber) {
+        try {
+            if (typeof bwipjs === 'undefined') {
+                console.error('bwip-js library not loaded');
+                return;
+            }
+
+            const filename = `${invoiceNumber}-hub3.png`;
+            const canvas = document.createElement('canvas');
+            bwipjs.toCanvas(canvas, {
+                bcid: 'pdf417',
+                text: string,
+                scale: 2,
+                height: 20,
+                includetext: false,
+                eclevel: 5,
+                columns: 6,
+                rows: 0
+            });
+
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } catch (error) {
+            console.error('HUB-3 generation error:', error);
+        }
     }
 
     escapeHtml(text) {

@@ -40,12 +40,17 @@ class XMLParser {
         }
     }
 
+    getTextNS(element, ns, localName) {
+        const el = element.getElementsByTagNameNS(ns, localName)[0];
+        return el ? el.textContent.trim() : null;
+    }
+
     extractInvoiceData(doc, invoice) {
         const data = {
             // Invoice identification
             invoiceNumber: this.getInvoiceNumber(invoice),
-            invoiceDate: this.getTextContent(invoice, 'cbc:IssueDate') || this.getTextContent(invoice, 'IssueDate'),
-            dueDate: this.getTextContent(invoice, 'cbc:DueDate') || this.getTextContent(invoice, 'DueDate'),
+            invoiceDate: this.getTextNS(invoice, UBL_NAMESPACES.cbc, 'IssueDate') || this.getTextContent(invoice, 'IssueDate'),
+            dueDate: this.getTextNS(invoice, UBL_NAMESPACES.cbc, 'DueDate') || this.getTextContent(invoice, 'DueDate'),
 
             // Currency and amount
             currency: this.getTextContent(invoice, 'cbc:DocumentCurrencyCode') || this.getTextContent(invoice, 'DocumentCurrencyCode') || 'EUR',
@@ -55,15 +60,25 @@ class XMLParser {
             supplierName: this.getSupplierName(invoice),
             supplierOib: this.getSupplierOib(invoice),
 
-        // Payment information
-        iban: this.getIBAN(invoice),
-        paymentId: this.getPaymentId(invoice),
-        model: '',
-        reference: '',
+            // Payer information (from AccountingCustomerParty)
+            payerName: this.getPayerName(invoice),
+            payerAddress: this.getPayerAddress(invoice),
+            payerCity: this.getPayerCity(invoice),
 
-        // Additional data
-        description: this.getTextContent(invoice, 'cbc:Note') || this.getTextContent(invoice, 'Note') || ''
-    };
+            // Receiver information (from AccountingSupplierParty)
+            receiverName: this.getReceiverName(invoice),
+            receiverAddress: this.getReceiverAddress(invoice),
+            receiverCity: this.getReceiverCity(invoice),
+
+            // Payment information
+            iban: this.getIBAN(invoice),
+            paymentId: this.getPaymentId(invoice),
+            model: '',
+            reference: '',
+
+            // Additional data
+            description: this.getTextContent(invoice, 'cbc:Note') || this.getTextContent(invoice, 'Note') || ''
+        };
 
     // Parse payment ID into model and reference
     if (data.paymentId) {
@@ -169,6 +184,7 @@ class XMLParser {
                 const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
                 const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
 
+                console.log(`getSupplierName: looking for ${tag}, found:`, !!found);
                 if (!found) {
                     el = null;
                     break;
@@ -177,17 +193,23 @@ class XMLParser {
             }
 
             if (el && el.textContent) {
+                console.log('getSupplierName: found name:', el.textContent.trim());
                 return el.textContent.trim();
             }
         }
 
         // Fallback to simple search
         const partyLegalEntity = invoice.getElementsByTagName('PartyLegalEntity')[0];
+        console.log('getSupplierName fallback: found PartyLegalEntity:', !!partyLegalEntity);
         if (partyLegalEntity) {
             const regName = partyLegalEntity.getElementsByTagName('RegistrationName')[0];
-            if (regName) return regName.textContent.trim();
+            if (regName) {
+                console.log('getSupplierName fallback: found name:', regName.textContent.trim());
+                return regName.textContent.trim();
+            }
         }
 
+        console.log('getSupplierName: returning null');
         return null;
     }
 
@@ -284,6 +306,110 @@ class XMLParser {
         return paymentId;
     }
 
+    getPayerName(invoice) {
+        const path = 'cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName';
+        const parts = path.split('/');
+        let el = invoice;
+
+        for (const part of parts) {
+            const tag = part.replace(/^cbc:/, '').replace(/^cac:/, '');
+            const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
+            const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
+
+            if (!found) {
+                el = null;
+                break;
+            }
+            el = found;
+        }
+
+        return el && el.textContent ? el.textContent.trim() : null;
+    }
+
+    getPayerAddress(invoice) {
+        const path = 'cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName';
+        const parts = path.split('/');
+        let el = invoice;
+
+        for (const part of parts) {
+            const tag = part.replace(/^cbc:/, '').replace(/^cac:/, '');
+            const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
+            const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
+
+            if (!found) {
+                el = null;
+                break;
+            }
+            el = found;
+        }
+
+        return el && el.textContent ? el.textContent.trim() : null;
+    }
+
+    getPayerCity(invoice) {
+        const path = 'cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CityName';
+        const parts = path.split('/');
+        let el = invoice;
+
+        for (const part of parts) {
+            const tag = part.replace(/^cbc:/, '').replace(/^cac:/, '');
+            const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
+            const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
+
+            if (!found) {
+                el = null;
+                break;
+            }
+            el = found;
+        }
+
+        return el && el.textContent ? el.textContent.trim() : null;
+    }
+
+    getReceiverName(invoice) {
+        return this.getSupplierName(invoice);
+    }
+
+    getReceiverAddress(invoice) {
+        const path = 'cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName';
+        const parts = path.split('/');
+        let el = invoice;
+
+        for (const part of parts) {
+            const tag = part.replace(/^cbc:/, '').replace(/^cac:/, '');
+            const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
+            const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
+
+            if (!found) {
+                el = null;
+                break;
+            }
+            el = found;
+        }
+
+        return el && el.textContent ? el.textContent.trim() : null;
+    }
+
+    getReceiverCity(invoice) {
+        const path = 'cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName';
+        const parts = path.split('/');
+        let el = invoice;
+
+        for (const part of parts) {
+            const tag = part.replace(/^cbc:/, '').replace(/^cac:/, '');
+            const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
+            const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
+
+            if (!found) {
+                el = null;
+                break;
+            }
+            el = found;
+        }
+
+        return el && el.textContent ? el.textContent.trim() : null;
+    }
+
     parsePaymentId(paymentId) {
         console.log('parsePaymentId() input:', paymentId);
 
@@ -310,6 +436,9 @@ class XMLParser {
             reference = trimmed;
         }
 
+        // Normalize reference: strip spaces for better scanner compatibility
+        reference = reference.replace(/\s+/g, '').trim();
+
         console.log('parsePaymentId() output: model="' + model + '" reference="' + reference + '"');
         return { model, reference };
     }
@@ -325,12 +454,12 @@ class XMLParser {
             warnings.push(i18n.t('warningMissingAmount'));
         }
 
-        if (!data.reference && !data.model) {
+        if (!data.reference || !data.model) {
             warnings.push(i18n.t('warningMissingReference'));
         }
 
-        // Warning if model was defaulted to HR01
-        if (data.paymentId && !data.paymentId.match(/^HR\d{2}\s/)) {
+        // Warning if model was defaulted (i.e., paymentId did not contain HRxx prefix)
+        if (data.paymentId && !/^HR\d{2}\b/.test(data.paymentId.trim())) {
             warnings.push(i18n.t('warningDefaultedModel'));
         }
 

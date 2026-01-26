@@ -91,11 +91,11 @@ class EPCGenerator {
         try {
             const qrCode = new QRCode(container, {
                 text: this.currentQrCode.data,
-                width: 256,
-                height: 256,
+                width: 300,
+                height: 300,
                 colorDark: '#000000',
                 colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.L  // Use L (low) for more capacity
+                correctLevel: QRCode.CorrectLevel.M  // Use M (medium) for better scanning
             });
 
             // Update the payment string display

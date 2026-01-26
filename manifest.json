@@ -2,7 +2,7 @@
   "name": "XML2Barcode - E-Račun u Bar Kod",
   "short_name": "XML2Barcode",
   "description": "Pretvori hrvatske e-račune u bar kodove za mobitel (HUB-3 PDF417 i EPC QR)",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",

@@ -12,21 +12,33 @@ class HUB3Generator {
 
     /**
      * Format the HUB-3 payment string
-     * Format: HR00|IBAN|Amount|Currency|Model|Reference|Purpose|Name
+     * Format: HRVHUB30\nEUR\n[15-char amount]\n[payer]\n[payer address]\n[payer city]\n[receiver]\n[receiver address]\n[receiver city]\n[IBAN]\n[model]\n[reference]\n[intent code]\n[description]
      */
     formatPaymentString(data) {
         const parts = [
-            'HR00',                              // Format identifier
-            data.iban || '',                     // IBAN
-            data.amount || '',                   // Amount
+            'HRVHUB30',                        // Header
             data.currency || 'EUR',              // Currency
+            this.encodeAmount(data.amount || '0'), // Amount (15 chars, no comma, padded)
+            data.payerName || '',                // Payer name
+            data.payerAddress || '',              // Payer address
+            data.payerCity || '',                // Payer city
+            data.receiverName || data.supplierName || '', // Receiver name (fallback to supplierName)
+            data.receiverAddress || '',           // Receiver address
+            data.receiverCity || '',             // Receiver city
+            data.iban || '',                    // IBAN
             data.model || '',                    // Model
             data.reference || '',                // Reference number
-            i18n.t('purposeDefault'),            // Purpose code
-            this.truncate(data.supplierName || '', 30) // Supplier name (max 30 chars)
+            'GDSV',                           // Intent code (default: GDSV - kupovina/prodaja roba i usluga)
+            this.truncate(data.invoiceNumber || data.description || '', 35) // Description (max 35 chars, use invoice number or description)
         ];
 
-        return parts.join('|');
+        return parts.join('\n');
+    }
+
+    encodeAmount(amount) {
+        if (!amount) return '000000000000000';
+        const amountWithoutComma = amount.toString().replace(',', '');
+        return amountWithoutComma.padStart(15, '0');
     }
 
     truncate(str, maxLength) {
@@ -56,10 +68,10 @@ class HUB3Generator {
             bwipjs.toCanvas(this.canvas, {
                 bcid: 'pdf417',         // Barcode type
                 text: paymentString,    // Text to encode
-                scale: 2,               // Scale factor (smaller = better for mobile)
-                height: 20,             // Module height (in pixels) - doubled for better scanning
+                scale: 2,               // Scale factor
+                height: 20,             // Module height - increased for proper aspect ratio
                 includetext: false,     // Show human-readable text
-                eclevel: 5,             // Error correction level (0-8)
+                eclevel: 3,             // Error correction level (1-5) - balanced for scanning
                 columns: 6,             // Number of columns (fewer = wider barcode)
                 rows: 0                 // Auto-calculate rows
             });
@@ -96,15 +108,9 @@ class HUB3Generator {
 
         container.innerHTML = '';
 
-        // Update the payment string display
-        const stringContainer = document.getElementById('hub3String');
-        if (stringContainer) {
-            stringContainer.textContent = this.currentBarcode.data;
-        }
-
         // If barcode generation failed, show error message
         if (this.currentBarcode.error || !this.canvas) {
-            container.innerHTML = '<p class="text-error">PDF417 biblioteka nije učitana. Bar kod se neće prikazati, ali su podaci ispravni.</p>';
+            container.innerHTML = `<p class="text-error">${i18n.t('errorLibraryNotLoaded')}</p>`;
             return;
         }
 
@@ -139,10 +145,10 @@ class HUB3Generator {
             const render = bwipjs.render({
                 bcid: 'pdf417',
                 text: this.currentBarcode.data,
-                scale: 2,
-                height: 20,
+                scale: 3,
+                height: 10,
                 includetext: false,
-                eclevel: 5,
+                eclevel: 3,
                 columns: 6,
                 rows: 0
             });

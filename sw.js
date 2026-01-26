@@ -5,17 +5,20 @@
 
 const CACHE_NAME = 'xml2barcode-v12';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/css/styles.css',
-    '/js/i18n.js',
-    '/js/storage.js',
-    '/js/xml-parser.js',
-    '/js/hub3-generator.js',
-    '/js/epc-generator.js',
-    '/js/ui.js',
-    '/js/app.js',
-    '/manifest.json'
+    './',
+    './index.html',
+    './css/styles.css',
+    './js/i18n.js',
+    './js/storage.js',
+    './js/xml-parser.js',
+    './js/hub3-generator.js',
+    './js/epc-generator.js',
+    './js/ui.js',
+    './js/app.js',
+    './manifest.json',
+    './lib/qrcode.min.js',
+    './lib/bwip-js-min.js',
+    './lib/jszip.min.js'
 ];
 
 // Install event - cache assets

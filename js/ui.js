@@ -109,14 +109,15 @@ class UI {
     }
 
     /**
-     * Download buttons for barcodes
-     */
+      * Download buttons for barcodes
+      */
     setupDownloadButtons() {
-        document.getElementById('downloadHub3Png').addEventListener('click', () => {
+        const hubBtn = document.getElementById('downloadHub3Png');
+        const epcBtn = document.getElementById('downloadEpcPng');
+        if (hubBtn) hubBtn.addEventListener('click', () => {
             hub3Generator.downloadAsPng(`${this.currentInvoiceData?.invoiceNumber || 'hub3'}-barcode.png`);
         });
-
-        document.getElementById('downloadEpcPng').addEventListener('click', () => {
+        if (epcBtn) epcBtn.addEventListener('click', () => {
             epcGenerator.downloadAsPng(`${this.currentInvoiceData?.invoiceNumber || 'epc'}-qrcode.png`);
         });
     }
@@ -188,15 +189,8 @@ class UI {
         hub3Generator.generate(data);
         hub3Generator.render('hub3Barcode');
 
-        epcGenerator.generate(data);
-        epcGenerator.render('epcQrCode');
-
         // Show results section
         document.getElementById('resultsSection').classList.remove('hidden');
-
-        // Add to history
-        storage.add(data);
-        this.renderInvoicesList();
     }
 
     /**
@@ -211,7 +205,7 @@ class UI {
       * Render invoices list
       */
     renderInvoicesList() {
-        storage.renderInvoicesList((item) => this.loadInvoiceFromHistory(item));
+        storage.renderInvoicesList();
     }
 
     /**
