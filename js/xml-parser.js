@@ -88,15 +88,7 @@ class XMLParser {
     }
 
     // Debug logging
-    console.log('Extracted invoice data:', {
-        invoiceNumber: data.invoiceNumber,
-        supplierName: data.supplierName,
-        amount: data.amount,
-        iban: data.iban,
-        paymentId: data.paymentId,
-        model: data.model,
-        reference: data.reference
-    });
+    debug.info('XMLParser', 'Extracted invoice data: ' + data.invoiceNumber + ' | ' + data.supplierName + ' | ' + data.amount);
 
         // Validate and add warnings
         data.warnings = this.validateData(data);
@@ -117,8 +109,8 @@ class XMLParser {
             if (localName === 'ID' || localName.endsWith(':ID')) {
                 const text = child.textContent.trim();
                 // Invoice IDs are typically longer than 2 characters
-                if (text && text.length > 2) {
-                    console.log('Found direct child invoice ID:', text);
+                if (text && text.length > CONSTANTS.VALIDATION.MIN_INVOICE_ID_LENGTH) {
+                    debug.info('XMLParser', 'Found direct child invoice ID: ' + text);
                     return text;
                 }
             }
@@ -133,14 +125,14 @@ class XMLParser {
                 parent = parent.parentNode;
             }
             // Only use if it's a direct child
-            if (parent === invoice && idElements[i].textContent.trim().length > 2) {
+            if (parent === invoice && idElements[i].textContent.trim().length > CONSTANTS.VALIDATION.MIN_INVOICE_ID_LENGTH) {
                 const text = idElements[i].textContent.trim();
-                console.log('Found namespace ID (direct child):', text);
+                debug.info('XMLParser', 'Found namespace ID (direct child): ' + text);
                 return text;
             }
         }
 
-        console.log('No invoice ID found');
+        debug.warn('XMLParser', 'No invoice ID found');
         return null;
     }
 
@@ -184,7 +176,7 @@ class XMLParser {
                 const ns = part.startsWith('cbc:') ? UBL_NAMESPACES.cbc : UBL_NAMESPACES.cac;
                 const found = el.getElementsByTagNameNS(ns, tag)[0] || el.getElementsByTagName(part)[0];
 
-                console.log(`getSupplierName: looking for ${tag}, found:`, !!found);
+                debug.info('XMLParser', 'getSupplierName: looking for ' + tag + ', found: ' + !!found);
                 if (!found) {
                     el = null;
                     break;
@@ -193,23 +185,23 @@ class XMLParser {
             }
 
             if (el && el.textContent) {
-                console.log('getSupplierName: found name:', el.textContent.trim());
+                debug.info('XMLParser', 'getSupplierName: found name: ' + el.textContent.trim());
                 return el.textContent.trim();
             }
         }
 
         // Fallback to simple search
         const partyLegalEntity = invoice.getElementsByTagName('PartyLegalEntity')[0];
-        console.log('getSupplierName fallback: found PartyLegalEntity:', !!partyLegalEntity);
+        debug.info('XMLParser', 'getSupplierName fallback: found PartyLegalEntity: ' + !!partyLegalEntity);
         if (partyLegalEntity) {
             const regName = partyLegalEntity.getElementsByTagName('RegistrationName')[0];
             if (regName) {
-                console.log('getSupplierName fallback: found name:', regName.textContent.trim());
+                debug.info('XMLParser', 'getSupplierName fallback: found name: ' + regName.textContent.trim());
                 return regName.textContent.trim();
             }
         }
 
-        console.log('getSupplierName: returning null');
+        debug.info('XMLParser', 'getSupplierName: returning null');
         return null;
     }
 
@@ -269,12 +261,16 @@ class XMLParser {
             }
         }
 
-        // Fallback: find any element that looks like an IBAN
+        // Fallback: find any IBAN matching any supported country pattern
         const allElements = invoice.getElementsByTagName('*');
         for (const el of allElements) {
             const text = el.textContent.trim().replace(/\s/g, '');
-            if (text.match(/^HR\d{19}$/)) {
-                return text;
+            // Check against all IBAN patterns
+            for (const [country, pattern] of Object.entries(CONSTANTS.IBAN_PATTERNS)) {
+                if (pattern.regex.test(text)) {
+                    debug.info('XMLParser', 'Found ' + country + ' IBAN: ' + text);
+                    return text;
+                }
             }
         }
 
@@ -302,7 +298,7 @@ class XMLParser {
         }
 
         const paymentId = el && el.textContent ? el.textContent.trim() : null;
-        console.log('getPaymentId() found:', paymentId);
+        debug.info('XMLParser', 'getPaymentId() found: ' + paymentId);
         return paymentId;
     }
 
@@ -411,7 +407,7 @@ class XMLParser {
     }
 
     parsePaymentId(paymentId) {
-        console.log('parsePaymentId() input:', paymentId);
+        debug.info('XMLParser', 'parsePaymentId() input: ' + paymentId);
 
         if (!paymentId) {
             return { model: '', reference: '' };
@@ -439,7 +435,7 @@ class XMLParser {
         // Normalize reference: strip spaces for better scanner compatibility
         reference = reference.replace(/\s+/g, '').trim();
 
-        console.log('parsePaymentId() output: model="' + model + '" reference="' + reference + '"');
+        debug.info('XMLParser', 'parsePaymentId() output: model="' + model + '" reference="' + reference + '"');
         return { model, reference };
     }
 

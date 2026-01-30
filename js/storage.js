@@ -4,7 +4,6 @@
  */
 
 const STORAGE_KEY = 'xml2barcode-history';
-const MAX_HISTORY_ITEMS = 20;
 
 class Storage {
     constructor() {
@@ -30,8 +29,8 @@ class Storage {
     }
 
     add(invoiceData, hub3String = null) {
-        console.log('storage.add() called with:', invoiceData);
-        const batchId = Math.floor(Date.now() / 30000) * 30000;  // 30s window
+        debug.info('Storage', 'storage.add() called with: ' + invoiceData.invoiceNumber);
+        const batchId = Math.floor(Date.now() / CONSTANTS.STORAGE.BATCH_TIME_WINDOW_MS) * CONSTANTS.STORAGE.BATCH_TIME_WINDOW_MS;
         const historyItem = {
             id: Date.now().toString(),
             timestamp: new Date().toISOString(),
@@ -51,7 +50,7 @@ class Storage {
             selected: true  // New items selected by default
         };
 
-        console.log('Creating history item:', historyItem);
+        debug.info('Storage', 'Creating history item: ' + historyItem.invoiceNumber);
 
         // Clear old selections, select current batch
         this.history.forEach(item => {
@@ -70,8 +69,8 @@ class Storage {
         this.history.unshift(historyItem);
 
         // Keep only MAX_HISTORY_ITEMS
-        if (this.history.length > MAX_HISTORY_ITEMS) {
-            this.history = this.history.slice(0, MAX_HISTORY_ITEMS);
+        if (this.history.length > CONSTANTS.STORAGE.MAX_HISTORY_ITEMS) {
+            this.history = this.history.slice(0, CONSTANTS.STORAGE.MAX_HISTORY_ITEMS);
         }
 
         this.saveHistory();
@@ -244,12 +243,12 @@ class Storage {
             bwipjs.toCanvas(canvas, {
                 bcid: 'pdf417',
                 text: string,
-                scale: 2,
-                height: 20,
+                scale: CONSTANTS.PDF417.SCALE,
+                height: CONSTANTS.PDF417.HEIGHT,
                 includetext: false,
-                eclevel: 5,
-                columns: 6,
-                rows: 0
+                eclevel: CONSTANTS.PDF417.ECLEVEL_HIGH,
+                columns: CONSTANTS.PDF417.COLUMNS,
+                rows: CONSTANTS.PDF417.ROWS
             });
 
             const link = document.createElement('a');

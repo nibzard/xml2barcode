@@ -68,12 +68,12 @@ class HUB3Generator {
             bwipjs.toCanvas(this.canvas, {
                 bcid: 'pdf417',         // Barcode type
                 text: paymentString,    // Text to encode
-                scale: 2,               // Scale factor
-                height: 20,             // Module height - increased for proper aspect ratio
+                scale: CONSTANTS.PDF417.SCALE,
+                height: CONSTANTS.PDF417.HEIGHT,
                 includetext: false,     // Show human-readable text
-                eclevel: 3,             // Error correction level (1-5) - balanced for scanning
-                columns: 6,             // Number of columns (fewer = wider barcode)
-                rows: 0                 // Auto-calculate rows
+                eclevel: CONSTANTS.PDF417.ECLEVEL,
+                columns: CONSTANTS.PDF417.COLUMNS,
+                rows: CONSTANTS.PDF417.ROWS
             });
 
             this.currentBarcode = {
@@ -145,12 +145,12 @@ class HUB3Generator {
             const render = bwipjs.render({
                 bcid: 'pdf417',
                 text: this.currentBarcode.data,
-                scale: 3,
-                height: 10,
+                scale: CONSTANTS.PDF417.SVG_SCALE,
+                height: CONSTANTS.PDF417.SVG_HEIGHT,
                 includetext: false,
-                eclevel: 3,
-                columns: 6,
-                rows: 0
+                eclevel: CONSTANTS.PDF417.ECLEVEL,
+                columns: CONSTANTS.PDF417.COLUMNS,
+                rows: CONSTANTS.PDF417.ROWS
             });
 
             const svgContent = render.makeSvg();

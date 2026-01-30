@@ -3,10 +3,6 @@
  * ABOUTME: Handles drag & drop, file selection, and coordinates all modules
  */
 
-const FEATURE_FLAGS = {
-    ENABLE_EPC: true
-};
-
 class App {
     constructor() {
         this.hasDisplayed = false;
@@ -15,7 +11,6 @@ class App {
 
     init() {
         debug.info('App', 'Initialized');
-        this.setupFeatureFlags();
         this.setupDragAndDrop();
         this.setupFileInput();
         this.setupDownloadAll();
@@ -35,18 +30,6 @@ class App {
             link.download = filename;
             link.href = dataUrl;
             link.click();
-        }
-    }
-
-    setupFeatureFlags() {
-        if (!FEATURE_FLAGS.ENABLE_EPC) {
-            const epcTabBtn = document.querySelector('[data-tab="epc"]');
-            const epcTabContent = document.getElementById('epcTab');
-            const downloadEpcBtn = document.getElementById('downloadEpcPng');
-
-            if (epcTabBtn) epcTabBtn.style.display = 'none';
-            if (epcTabContent) epcTabContent.style.display = 'none';
-            if (downloadEpcBtn) downloadEpcBtn.style.display = 'none';
         }
     }
 
@@ -233,6 +216,12 @@ class App {
             return false;
         }
 
+        // Validate file size
+        if (file.size > CONSTANTS.MAX_FILE_SIZE) {
+            ui.showError(`${file.name}: ${i18n.t('errorFileTooLarge')}`);
+            return false;
+        }
+
         ui.showLoading();
         debug.info('ProcessFile', 'Starting: ' + file.name);
 
@@ -249,7 +238,7 @@ class App {
             const hub3String = hub3?.data || null;
 
             // Add to storage
-            storage.add(invoiceData, hub3String, null);
+            storage.add(invoiceData, hub3String);
             debug.info('ProcessFile', 'Added to history');
 
             // Show first invoice in UI
@@ -322,12 +311,12 @@ class App {
             bwipjs.toCanvas(canvas, {
                 bcid: 'pdf417',
                 text: string,
-                scale: 2,
-                height: 20,
+                scale: CONSTANTS.PDF417.SCALE,
+                height: CONSTANTS.PDF417.HEIGHT,
                 includetext: false,
-                eclevel: 5,
-                columns: 6,
-                rows: 0
+                eclevel: CONSTANTS.PDF417.ECLEVEL_HIGH,
+                columns: CONSTANTS.PDF417.COLUMNS,
+                rows: CONSTANTS.PDF417.ROWS
             });
 
             return this.dataUrlToBlob(canvas.toDataURL('image/png'));

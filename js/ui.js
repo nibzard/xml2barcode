@@ -153,7 +153,7 @@ class UI {
      * Display invoice data in the UI
      */
     displayInvoiceData(data) {
-        console.log('displayInvoiceData called with:', data);
+        debug.info('UI', 'displayInvoiceData called with: ' + data.invoiceNumber);
         this.currentInvoiceData = data;
 
         // Invoice summary
@@ -162,8 +162,8 @@ class UI {
         document.getElementById('supplier').textContent = data.supplierName || data.supplier || '-';
         document.getElementById('amount').textContent = `${data.amount || '0'} ${data.currency || ''}`;
 
-        console.log('Set DOM elements - invoiceNumber:', document.getElementById('invoiceNumber').textContent);
-        console.log('Set DOM elements - supplier:', document.getElementById('supplier').textContent);
+        debug.info('UI', 'Set DOM elements - invoiceNumber: ' + document.getElementById('invoiceNumber').textContent);
+        debug.info('UI', 'Set DOM elements - supplier: ' + document.getElementById('supplier').textContent);
 
         // Payment details
         document.getElementById('iban').textContent = this.formatIBAN(data.iban || '-');
@@ -360,8 +360,8 @@ class UI {
                     const canvas = document.createElement('canvas');
                     bwipjs.toCanvas(canvas, {
                         bcid: 'pdf417', text: item.hub3String,
-                        scale: 2, height: 20, includetext: false,
-                        eclevel: 5, columns: 6, rows: 0
+                        scale: CONSTANTS.PDF417.SCALE, height: CONSTANTS.PDF417.HEIGHT, includetext: false,
+                        eclevel: CONSTANTS.PDF417.ECLEVEL_HIGH, columns: CONSTANTS.PDF417.COLUMNS, rows: CONSTANTS.PDF417.ROWS
                     });
                     barcodeDataUrl = canvas.toDataURL('image/png');
                 } catch (e) { console.error('Barcode error:', e); }

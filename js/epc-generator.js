@@ -39,10 +39,10 @@ class EPCGenerator {
         lines.push((data.reference || '').replace(/\s/g, ''));
         // Unstructured remittance information (keep it short to fit QR limits)
         let remittance = data.invoiceNumber || '';
-        if (data.description && data.description.length < 50) {
+        if (data.description && data.description.length < CONSTANTS.QR_CODE.REMITTANCE_THRESHOLD) {
             remittance = data.description;
         }
-        lines.push(this.truncate(remittance, 70));
+        lines.push(this.truncate(remittance, CONSTANTS.QR_CODE.REMITTANCE_MAX_LENGTH));
 
         // Return with CRLF line endings as per spec
         return lines.join('\r\n');
@@ -91,8 +91,8 @@ class EPCGenerator {
         try {
             const qrCode = new QRCode(container, {
                 text: this.currentQrCode.data,
-                width: 300,
-                height: 300,
+                width: CONSTANTS.QR_CODE.SIZE,
+                height: CONSTANTS.QR_CODE.SIZE,
                 colorDark: '#000000',
                 colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M  // Use M (medium) for better scanning
