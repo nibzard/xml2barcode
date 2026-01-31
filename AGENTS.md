@@ -147,3 +147,61 @@ All translatable text uses `data-i18n="key"` in HTML:
 - etc.
 
 See js/i18n.js for full list of keys.
+
+## Version Management
+
+### Version Number Location
+The version is stored in `js/constants.js`:
+```javascript
+const CONSTANTS = {
+    VERSION: '1.3.0',
+    // ...
+};
+```
+
+### When to Bump Version
+- **Major (X.0.0)**: Breaking changes, incompatible API changes
+- **Minor (0.X.0)**: New features, backwards compatible additions
+- **Patch (0.0.X)**: Bug fixes, small improvements, translations
+
+### Version Bump Process
+1. Edit `js/constants.js` and update `VERSION`
+2. Update service worker cache version in `sw.js` (e.g., `xml2barcode-v14` → `xml2barcode-v15`)
+3. Commit and push changes
+
+### Automatic Version Bump (Pre-commit Hook)
+A pre-commit hook can automatically increment the patch version on each commit:
+
+```bash
+# Install the pre-commit hook
+cat > .git/hooks/pre-commit << 'SCRIPT'
+#!/bin/bash
+# Auto-increment version on commit
+
+# Get current version from constants.js
+CURRENT=$(grep "VERSION:" js/constants.js | sed "s/.*VERSION: '\([^']*\)'.*/\1/")
+
+# Split version into parts
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+
+# Increment patch version
+PATCH=$((PATCH + 1))
+NEW="$MAJOR.$MINOR.$PATCH"
+
+# Update version in constants.js
+sed -i "s/VERSION: '$CURRENT'/VERSION: '$NEW'/" js/constants.js
+
+# Add updated constants.js to staging
+git add js/constants.js
+
+echo "✓ Version bumped: $CURRENT → $NEW"
+SCRIPT
+
+chmod +x .git/hooks/pre-commit
+```
+
+To disable automatic version bumping temporarily:
+```bash
+mv .git/hooks/pre-commit .git/hooks/pre-commit.disabled
+```
+
