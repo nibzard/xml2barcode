@@ -15,6 +15,7 @@ class App {
         this.setupFileInput();
         this.setupDownloadAll();
         this.setupAddMoreButton();
+        this.setupViewResultsButton();
         this.renderInvoicesList();
     }
 
@@ -101,6 +102,7 @@ class App {
     toggleDropZone(show) {
         const dropZone = document.getElementById('dropZone');
         const addMoreBtn = document.getElementById('addMoreBtn');
+        const uploadSuccess = document.getElementById('uploadSuccess');
 
         if (dropZone) {
             if (show) {
@@ -117,6 +119,29 @@ class App {
                 addMoreBtn.classList.remove('hidden');
             }
         }
+
+        if (uploadSuccess) {
+            if (show) {
+                uploadSuccess.classList.add('hidden');
+            } else {
+                uploadSuccess.classList.remove('hidden');
+            }
+        }
+    }
+
+    /**
+     * Setup view results button
+     */
+    setupViewResultsButton() {
+        const viewResultsBtn = document.getElementById('viewResultsBtn');
+        if (!viewResultsBtn) return;
+
+        viewResultsBtn.addEventListener('click', () => {
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
     }
 
     /**

@@ -189,6 +189,12 @@ class UI {
         hub3Generator.generate(data);
         hub3Generator.render('hub3Barcode');
 
+        // Hide upload success message when viewing results
+        const uploadSuccess = document.getElementById('uploadSuccess');
+        if (uploadSuccess) {
+            uploadSuccess.classList.add('hidden');
+        }
+
         // Show results section
         const resultsSection = document.getElementById('resultsSection');
         resultsSection.classList.remove('hidden');

@@ -48,7 +48,9 @@ const translations = {
         addMoreFiles: "+ Dodaj još datoteka",
         printSelected: "Ispiši odabrane",
         newBatch: "Novo",
-        version: "Verzija"
+        version: "Verzija",
+        uploadSuccess: "Datoteka uspješno učitana!",
+        viewResults: "Pregledaj rezultate"
     },
     en: {
         subtitle: "E-Invoice to Barcode",
@@ -94,7 +96,9 @@ const translations = {
         addMoreFiles: "+ Add more files",
         printSelected: "Print Selected",
         newBatch: "New",
-        version: "Version"
+        version: "Version",
+        uploadSuccess: "File uploaded successfully!",
+        viewResults: "View Results"
     }
 };
 
