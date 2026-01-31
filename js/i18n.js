@@ -47,7 +47,8 @@ const translations = {
         purposeDefault: "PLAĆANJE",
         addMoreFiles: "+ Dodaj još datoteka",
         printSelected: "Ispiši odabrane",
-        newBatch: "Novo"
+        newBatch: "Novo",
+        version: "Verzija"
     },
     en: {
         subtitle: "E-Invoice to Barcode",
@@ -92,7 +93,8 @@ const translations = {
         purposeDefault: "PAYMENT",
         addMoreFiles: "+ Add more files",
         printSelected: "Print Selected",
-        newBatch: "New"
+        newBatch: "New",
+        version: "Version"
     }
 };
 
@@ -129,6 +131,13 @@ class I18n {
 
         document.documentElement.lang = this.currentLang;
         document.getElementById('langToggle').textContent = this.currentLang === 'hr' ? 'EN' : 'HR';
+
+        // Update version link
+        const versionLink = document.getElementById('versionLink');
+        if (versionLink) {
+            versionLink.href = CONSTANTS.RELEASES_URL;
+            versionLink.textContent = this.t('version') + ' ' + CONSTANTS.VERSION;
+        }
     }
 }
 

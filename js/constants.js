@@ -2,6 +2,10 @@
  * Shared constants for XML2Barcode application
  */
 const CONSTANTS = {
+    // Application info
+    VERSION: '1.3.0',
+    GITHUB_URL: 'https://github.com/nibzard/xml2barcode',
+    RELEASES_URL: 'https://github.com/nibzard/xml2barcode/releases',
     // File validation
     MAX_FILE_SIZE: 5 * 1024 * 1024,  // 5MB
 
