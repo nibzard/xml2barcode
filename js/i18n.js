@@ -136,11 +136,10 @@ class I18n {
         document.documentElement.lang = this.currentLang;
         document.getElementById('langToggle').textContent = this.currentLang === 'hr' ? 'EN' : 'HR';
 
-        // Update version link
-        const versionLink = document.getElementById('versionLink');
-        if (versionLink) {
-            versionLink.href = CONSTANTS.RELEASES_URL;
-            versionLink.textContent = this.t('version') + ' ' + CONSTANTS.VERSION;
+        // Update version label (non-clickable, just shows version)
+        const versionLabel = document.getElementById('versionLabel');
+        if (versionLabel) {
+            versionLabel.textContent = this.t('version') + ' ' + CONSTANTS.VERSION;
         }
     }
 }

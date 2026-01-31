@@ -615,6 +615,11 @@ body.drag-over .main {
     color: var(--text-muted);
 }
 
+.footer-links .version-label {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
 /* ABOUTME: Debug Panel */
 .debug-panel {
     position: fixed;

@@ -3,7 +3,7 @@
  */
 const CONSTANTS = {
     // Application info
-    VERSION: '1.3.1',
+    VERSION: '1.3.2',
     GITHUB_URL: 'https://github.com/nibzard/xml2barcode',
     RELEASES_URL: 'https://github.com/nibzard/xml2barcode/releases',
     // File validation
