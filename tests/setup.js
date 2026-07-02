@@ -31,6 +31,37 @@ function loadParserContext() {
     return {
         textParser: vm.runInContext('textParser', ctx),
         TextParser: vm.runInContext('TextParser', ctx),
+        xmlParser: vm.runInContext('xmlParser', ctx),
+        XMLParser: vm.runInContext('XMLParser', ctx),
+        CONSTANTS: vm.runInContext('CONSTANTS', ctx),
+    };
+}
+
+// Loads constants + xml-parser + the pure iban-trust module (no DOM/storage needed;
+// history is passed in by the caller). Used by the IBAN-trust unit/integration tests.
+function loadTrustContext() {
+    const root = path.resolve(__dirname, '..');
+    const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+
+    const sandbox = {
+        console,
+        DOMParser: class { parseFromString() { return null; } },
+        debug: { info() {}, warn() {}, error() {}, log() {} },
+        i18n: { t: (key) => key },
+    };
+
+    const ctx = vm.createContext(sandbox);
+    vm.runInContext(read('js/constants.js'), ctx);
+    vm.runInContext(read('js/xml-parser.js'), ctx);
+    vm.runInContext(read('js/iban-trust.js'), ctx);
+
+    return {
+        xmlParser: vm.runInContext('xmlParser', ctx),
+        ibanTrust: vm.runInContext('ibanTrust', ctx),
+        IbanTrust: vm.runInContext('IbanTrust', ctx),
+        composeTrustMessages: vm.runInContext('composeTrustMessages', ctx),
+        buildDisplayMessages: vm.runInContext('buildDisplayMessages', ctx),
+        messagesToHtml: vm.runInContext('messagesToHtml', ctx),
         CONSTANTS: vm.runInContext('CONSTANTS', ctx),
     };
 }
@@ -57,4 +88,4 @@ function loadGeneratorContext() {
     return { hub3Generator: vm.runInContext('hub3Generator', ctx) };
 }
 
-module.exports = { loadParserContext, loadGeneratorContext };
+module.exports = { loadParserContext, loadGeneratorContext, loadTrustContext };

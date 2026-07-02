@@ -258,14 +258,14 @@ class XMLParser {
             }
 
             if (el && el.textContent) {
-                return el.textContent.trim().replace(/\s/g, '');
+                return this.normalizeIBAN(el.textContent.trim());
             }
         }
 
         // Fallback: find any IBAN matching any supported country pattern
         const allElements = invoice.getElementsByTagName('*');
         for (const el of allElements) {
-            const text = el.textContent.trim().replace(/\s/g, '');
+            const text = this.normalizeIBAN(el.textContent.trim());
             // Check against all IBAN patterns
             for (const [country, pattern] of Object.entries(CONSTANTS.IBAN_PATTERNS)) {
                 if (pattern.regex.test(text)) {
@@ -440,11 +440,43 @@ class XMLParser {
         return { model, reference };
     }
 
+    /**
+     * Canonical IBAN form for storage and comparison: no whitespace, uppercase.
+     * The XML and text pipelines previously uppercased inconsistently, which fragmented
+     * the "have I used this IBAN before?" comparison. Route all IBANs through here.
+     */
+    normalizeIBAN(iban) {
+        return (iban || '').toString().replace(/\s/g, '').toUpperCase();
+    }
+
+    /**
+     * IBAN check-digit validation (ISO 13616 mod-97). Catches the single-digit and
+     * transposition typos that the country regexes cannot — the exact failure mode that
+     * turns a hand-typed IBAN into a payment to the wrong person. Returns false (never
+     * throws) for anything that is not a structurally well-formed IBAN.
+     */
+    validateIBANChecksum(iban) {
+        const s = this.normalizeIBAN(iban);
+        if (!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(s)) return false;
+        // Move the first 4 chars (country + check digits) to the end, expand letters
+        // to numbers (A=10..Z=35), then take mod 97 over the resulting big integer.
+        const rearranged = s.slice(4) + s.slice(0, 4);
+        const expanded = rearranged.replace(/[A-Z]/g, (c) => (c.charCodeAt(0) - 55).toString());
+        let remainder = 0n;
+        for (const ch of expanded) {
+            remainder = (remainder * 10n + BigInt(parseInt(ch, 10))) % 97n;
+        }
+        return remainder === 1n;
+    }
+
     validateData(data) {
         const warnings = [];
 
         if (!data.iban) {
             warnings.push(i18n.t('warningMissingIban'));
+        } else if (!this.validateIBANChecksum(data.iban)) {
+            // Present but fails the mod-97 check-digit: almost certainly a typo.
+            warnings.push(i18n.t('warningInvalidIban'));
         }
 
         if (!data.amount) {

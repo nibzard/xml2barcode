@@ -171,15 +171,14 @@ class UI {
         document.getElementById('reference').textContent = data.reference || '-';
         document.getElementById('purpose').textContent = i18n.t('purposeDefault');
 
-        // Validation messages
+        // Validation + IBAN-trust messages (severity-classed: warning / caution / info).
+        // Parser warnings are 'warning'; the trust layer adds a 'caution' for an unseen
+        // IBAN, a 'warning' for an IBAN/name mismatch, or a muted 'info' for a known IBAN.
         const validationContainer = document.getElementById('validationMessages');
-        if (data.warnings && data.warnings.length > 0) {
-            validationContainer.innerHTML = `
-                <ul>
-                    ${data.warnings.map(w => `<li>${this.escapeHtml(w)}</li>`).join('')}
-                </ul>
-            `;
-            validationContainer.className = 'validation-messages warning';
+        const messages = buildDisplayMessages(data, storage.getAll(), (k) => i18n.t(k));
+        if (messages.length > 0) {
+            validationContainer.innerHTML = messagesToHtml(messages, (t) => this.escapeHtml(t));
+            validationContainer.className = 'validation-messages has-messages';
             validationContainer.classList.remove('hidden');
         } else {
             validationContainer.classList.add('hidden');

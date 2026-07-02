@@ -365,6 +365,22 @@ body.drag-over .main {
     flex-shrink: 0;
 }
 
+/* IBAN-trust severity: amber for warnings/cautions, muted for the familiar-IBAN note.
+   Deliberately no green / no checkmark — history is recognition, not verification. */
+.validation-messages li.msg-warning::before,
+.validation-messages li.msg-caution::before {
+    color: var(--warning);
+}
+
+.validation-messages li.msg-info::before {
+    content: "•";
+    color: var(--text-muted);
+}
+
+.validation-messages li.msg-info {
+    color: var(--text-secondary);
+}
+
 /* ABOUTME: Results section */
 .results-section {
     display: flex;
