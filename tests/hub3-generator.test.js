@@ -70,3 +70,26 @@ test('formatPaymentString amount field is pure eurocents (no decimal point)', ()
     assert.strictEqual(fields[2], '000000000093373');
     assert.ok(!fields[2].includes('.'), 'amount field must contain no decimal point');
 });
+
+test('encodeAmount rejects negatives, non-finite, and overflow to the zero sentinel', () => {
+    const zeros = '000000000000000';
+    // Negatives are reachable via storno/credit-note invoices and must not leak a '-'.
+    for (const inp of ['-9.99', '-0.01', '-100', '-9999999999.99']) {
+        assert.strictEqual(hub3Generator.encodeAmount(inp), zeros, `encodeAmount('${inp}')`);
+    }
+    // Non-finite values must not leak letters ("Infinity").
+    for (const inp of ['Infinity', '-Infinity', '1e350']) {
+        assert.strictEqual(hub3Generator.encodeAmount(inp), zeros, `encodeAmount('${inp}')`);
+    }
+    // Overflow beyond the 15-digit ceiling must collapse to the sentinel, not grow.
+    assert.strictEqual(hub3Generator.encodeAmount('99999999999999.99'), zeros, 'overflow');
+});
+
+test('encodeAmount output always satisfies the 15-pure-digits format invariant', () => {
+    const inputs = ['933.73', '0', '123.55', '-9.99', 'Infinity', '', null, undefined,
+                    '99999999999999.99', '1e350', '1,50'];
+    for (const inp of inputs) {
+        assert.ok(/^\d{15}$/.test(hub3Generator.encodeAmount(inp)),
+            `encodeAmount('${inp}') must be 15 pure digits, got '${hub3Generator.encodeAmount(inp)}'`);
+    }
+});

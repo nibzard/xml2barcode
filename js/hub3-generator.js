@@ -37,9 +37,13 @@ class HUB3Generator {
 
     encodeAmount(amount) {
         if (!amount) return '000000000000000';
-        // HUB 3A: amount is in eurocents, no decimal mark, right-aligned, zero-padded to 15.
+        // HUB 3A: amount in eurocents, no decimal mark, right-aligned, zero-padded to 15.
         const cents = Math.round(parseFloat(String(amount).replace(',', '.')) * 100);
-        if (isNaN(cents)) return '000000000000000';
+        // Reject anything that would break the fixed 15-digit field: non-finite values
+        // (Infinity/NaN), negatives (the spec allows no sign; reachable via storno/credit
+        // notes), and overflow beyond the 15-digit ceiling. Emit the zero sentinel in all
+        // such cases so the field is always exactly 15 digits.
+        if (!isFinite(cents) || cents < 0 || cents > 999999999999999) return '000000000000000';
         return String(cents).padStart(15, '0');
     }
 

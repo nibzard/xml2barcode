@@ -3,7 +3,7 @@
  * ABOUTME: Enables offline functionality and fast loading
  */
 
-const CACHE_NAME = 'xml2barcode-v17';
+const CACHE_NAME = 'xml2barcode-v18';
 const urlsToCache = [
     './',
     './index.html',
