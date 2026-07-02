@@ -37,8 +37,10 @@ class HUB3Generator {
 
     encodeAmount(amount) {
         if (!amount) return '000000000000000';
-        const amountWithoutComma = amount.toString().replace(',', '');
-        return amountWithoutComma.padStart(15, '0');
+        // HUB 3A: amount is in eurocents, no decimal mark, right-aligned, zero-padded to 15.
+        const cents = Math.round(parseFloat(String(amount).replace(',', '.')) * 100);
+        if (isNaN(cents)) return '000000000000000';
+        return String(cents).padStart(15, '0');
     }
 
     truncate(str, maxLength) {

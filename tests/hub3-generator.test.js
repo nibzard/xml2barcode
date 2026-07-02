@@ -39,3 +39,34 @@ test('purpose code is emitted when provided on the data object', () => {
     const fields = hub3Generator.formatPaymentString({ ...baseData, purposeCode: 'COST' }).split('\n');
     assert.strictEqual(fields[12], 'COST');
 });
+
+test('encodeAmount converts to spec-compliant eurocents (no decimal point)', () => {
+    // HUB 3A spec: amount in eurocents, no decimal mark, right-aligned, zero-padded to 15.
+    const cases = [
+        ['123.55', '000000000012355'],     // spec worked example (123.55 EUR -> 12355 cents)
+        ['933.73', '000000000093373'],
+        ['500.00', '000000000050000'],
+        ['100',    '000000000010000'],     // whole-euro integer
+        ['1.50',   '000000000000150'],
+        ['0.05',   '000000000000005'],
+        ['99999999.99', '000009999999999'] // near the 15-digit ceiling
+    ];
+    for (const [inp, expected] of cases) {
+        assert.strictEqual(hub3Generator.encodeAmount(inp), expected, `encodeAmount('${inp}')`);
+    }
+});
+
+test('encodeAmount tolerates comma decimals and falsy input', () => {
+    assert.strictEqual(hub3Generator.encodeAmount('933,73'), '000000000093373');
+    assert.strictEqual(hub3Generator.encodeAmount(''), '000000000000000');
+    assert.strictEqual(hub3Generator.encodeAmount(null), '000000000000000');
+    assert.strictEqual(hub3Generator.encodeAmount(undefined), '000000000000000');
+});
+
+test('formatPaymentString amount field is pure eurocents (no decimal point)', () => {
+    const fields = hub3Generator.formatPaymentString({
+        amount: '933.73', iban: 'HR5423900013221482195', model: 'HR69', reference: '1'
+    }).split('\n');
+    assert.strictEqual(fields[2], '000000000093373');
+    assert.ok(!fields[2].includes('.'), 'amount field must contain no decimal point');
+});
