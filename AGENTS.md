@@ -58,10 +58,12 @@ xml2barcode/
 │   ├── i18n.js            # Internationalization
 │   ├── storage.js          # LocalStorage (invoices list)
 │   ├── xml-parser.js        # XML parsing
+│   ├── text-parser.js       # Free-form text parsing (paste payment text)
 │   ├── hub3-generator.js    # PDF417 generation
 │   ├── epc-generator.js     # QR code generation
 │   ├── ui.js              # UI helpers
 │   └── app.js             # Main app logic
+├── tests/                 # Node unit/integration tests (run: node --test tests/*.test.js)
 ├── examples/               # Sample XML invoices
 ├── manifest.json           # PWA manifest
 ├── sw.js                 # Service worker
@@ -76,6 +78,7 @@ xml2barcode/
 | storage.js | LocalStorage management, invoices list rendering |
 | ui.js | UI helpers, displayInvoiceData, theme switching |
 | xml-parser.js | XML parsing, extracts invoice data |
+| text-parser.js | Parses pasted payment text (IBAN/amount/reference/description) into invoice data |
 | hub3-generator.js | PDF417 barcode generation (HUB-3 format) |
 | epc-generator.js | QR code generation (EPC format) |
 | i18n.js | Croatian/English translations |
@@ -100,6 +103,16 @@ xml2barcode/
 10. `ui.displayInvoiceData()` updates DOM
 11. `app.js:processFile()` calls `storage.renderInvoicesList()`
 12. `storage.renderInvoicesList()` renders unified invoices list
+
+### Text-input Data Flow (Paste text mode)
+Both input modes share the same downstream pipeline from the invoice-data object onward.
+1. User picks "Paste text" toggle, pastes payment text, clicks Generate
+2. `app.js:processText()` validates non-empty text
+3. `textParser.parse(text)` returns the same invoice-data shape as `xmlParser.parse()`
+   (reuses `xmlParser.parsePaymentId` / `xmlParser.validateData` / `CONSTANTS.IBAN_PATTERNS`)
+4. `app.js:processText()` reuses `hub3Generator.generate` → `storage.add` → `ui.displayInvoiceData`
+   (identical to the XML path from this point on); every result is displayed
+
 
 ### Important Notes
 

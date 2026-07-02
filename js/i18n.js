@@ -50,7 +50,13 @@ const translations = {
         newBatch: "Novo",
         version: "Verzija",
         uploadSuccess: "Datoteka uspješno učitana!",
-        viewResults: "Pregledaj rezultate"
+        viewResults: "Pregledaj rezultate",
+        modeUpload: "Učitaj XML",
+        modeText: "Zalijepi tekst",
+        textInputPlaceholder: "Zalijepi podatke za plaćanje (IBAN, iznos, model i poziv na broj, opis plaćanja)…",
+        generateBtn: "Generiraj bar kod",
+        errorEmptyText: "Unesite tekst s podacima za plaćanje.",
+        errorParseText: "Nije moguće pročitati podatke za plaćanje iz teksta."
     },
     en: {
         subtitle: "E-Invoice to Barcode",
@@ -98,7 +104,13 @@ const translations = {
         newBatch: "New",
         version: "Version",
         uploadSuccess: "File uploaded successfully!",
-        viewResults: "View Results"
+        viewResults: "View Results",
+        modeUpload: "Upload XML",
+        modeText: "Paste text",
+        textInputPlaceholder: "Paste payment details (IBAN, amount, model & reference, payment description)…",
+        generateBtn: "Generate barcode",
+        errorEmptyText: "Please paste some payment text first.",
+        errorParseText: "Could not read payment details from the text."
     }
 };
 
@@ -131,6 +143,11 @@ class I18n {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             el.textContent = this.t(key);
+        });
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            el.placeholder = this.t(key);
         });
 
         document.documentElement.lang = this.currentLang;

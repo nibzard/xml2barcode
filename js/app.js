@@ -13,6 +13,8 @@ class App {
         debug.info('App', 'Initialized');
         this.setupDragAndDrop();
         this.setupFileInput();
+        this.setupInputModeToggle();
+        this.setupTextInput();
         this.setupDownloadAll();
         this.setupAddMoreButton();
         this.setupViewResultsButton();
@@ -282,6 +284,106 @@ class App {
             }
             ui.showError(`${file.name}: ${error.message || i18n.t('errorInvalidXml')}`);
             return false;  // Failure
+        } finally {
+            ui.hideLoading();
+        }
+    }
+
+    /**
+      * Switch between "Upload XML" and "Paste text" input modes.
+      */
+    setInputMode(mode) {
+        const isText = mode === 'text';
+
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            const active = btn.getAttribute('data-mode') === mode;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+
+        const dropZone = document.getElementById('dropZone');
+        const textZone = document.getElementById('textInputZone');
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        if (dropZone) dropZone.classList.toggle('hidden', isText);
+        if (textZone) textZone.classList.toggle('hidden', !isText);
+        // addMoreBtn belongs to the file flow: hide it in text mode, otherwise let the
+        // upload state (hasDisplayed) decide its visibility.
+        if (addMoreBtn) addMoreBtn.classList.toggle('hidden', isText || !this.hasDisplayed);
+
+        ui.clearErrors();
+    }
+
+    setupInputModeToggle() {
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.setInputMode(btn.getAttribute('data-mode'));
+            });
+        });
+    }
+
+    setupTextInput() {
+        const generateBtn = document.getElementById('generateFromTextBtn');
+        const textarea = document.getElementById('paymentTextInput');
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                this.processText(textarea ? textarea.value : '');
+            });
+        }
+
+        if (textarea) {
+            textarea.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd+Enter submits the pasted text.
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    this.processText(textarea.value);
+                }
+            });
+        }
+    }
+
+    /**
+      * Process pasted payment text: parse -> generate HUB-3 -> store -> display.
+      * Mirrors processFile but swaps the XML parse for the text parser, and shows
+      * every result (the user generates one at a time, unlike batch XML upload).
+      */
+    async processText(text) {
+        ui.clearErrors();
+
+        if (!text || !text.trim()) {
+            ui.showError(i18n.t('errorEmptyText'));
+            return false;
+        }
+
+        ui.showLoading();
+        debug.info('ProcessText', 'Starting text parse');
+
+        try {
+            const invoiceData = textParser.parse(text);
+            debug.info('ProcessText', 'Parsed: ' + (invoiceData.invoiceNumber || 'unknown') + ' | ' + (invoiceData.amount || '0') + ' ' + (invoiceData.currency || ''));
+
+            // Same downstream pipeline as processFile
+            const hub3 = hub3Generator.generate(invoiceData);
+            const hub3String = hub3?.data || null;
+
+            storage.add(invoiceData, hub3String);
+            debug.info('ProcessText', 'Added to history');
+
+            ui.displayInvoiceData(invoiceData);
+            this.hasDisplayed = true;
+            debug.info('ProcessText', 'Displayed in UI');
+
+            this.renderInvoicesList();
+            return true;
+        } catch (error) {
+            console.error('Error processing text:', error);
+            debug.error('ProcessText', 'Error: ' + error.message);
+            if (this.hasDisplayed) {
+                ui.clearCurrentDisplay();
+            }
+            ui.showError(i18n.t('errorParseText') + (error.message ? ': ' + error.message : ''));
+            return false;
         } finally {
             ui.hideLoading();
         }
