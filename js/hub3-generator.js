@@ -28,7 +28,7 @@ class HUB3Generator {
             data.iban || '',                    // IBAN
             data.model || '',                    // Model
             data.reference || '',                // Reference number
-            'GDSV',                           // Intent code (default: GDSV - kupovina/prodaja roba i usluga)
+            data.purposeCode || '',            // Šifra namjene (ISO 20022 purpose code); empty when not specified
             this.truncate(data.invoiceNumber || data.description || '', 35) // Description (max 35 chars, use invoice number or description)
         ];
 

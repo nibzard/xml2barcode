@@ -124,3 +124,18 @@ test('does not throw on empty or garbage input', () => {
     assert.ok(garbage.warnings.includes('warningMissingIban'));
     assert.ok(garbage.warnings.includes('warningMissingAmount'));
 });
+
+test('extracts šifra namjene (purpose code) when the label is present', () => {
+    const d = textParser.parse([
+        'IBAN: HR5423900013221482195',
+        'Iznos: 50,00 eur',
+        'Šifra namjene: COST',
+        'Opis plaćanja: Troškovi putovanja'
+    ].join('\n'));
+    assert.strictEqual(d.purposeCode, 'COST');
+});
+
+test('purpose code is empty when the text contains no šifra namjene', () => {
+    const d = textParser.parse(NIKO_EXAMPLE);
+    assert.strictEqual(d.purposeCode, '');
+});

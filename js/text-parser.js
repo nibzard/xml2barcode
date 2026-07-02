@@ -42,6 +42,7 @@ class TextParser {
             model: '',
             reference: '',
             description: description || '',
+            purposeCode: this.getPurposeCode(lines),
             // Informational only: the payer (platitelj) reference. The current HUB-3
             // generator encodes a single reference (the payee's), so this is not emitted.
             payerReference: payerRefRaw || ''
@@ -210,8 +211,21 @@ class TextParser {
         return null;
     }
 
-    getDescription(lines) {
-        const labels = [
+    getPurposeCode(lines) {
+        // Field 13 of HUB 3A: šifra namjene (ISO 20022 purpose code, e.g. COST, SALA).
+        // Only set when the pasted text explicitly states it; otherwise left empty
+        // (spec-compliant — only the Iznos field is padded).
+        const labels = ['sifra namjene', 'purpose code', 'category purpose'];
+        for (const line of lines) {
+            const cleaned = this.cleanValue(this.valueAfterLabel(line, labels));
+            if (!cleaned) continue;
+            const match = cleaned.match(/^[A-Za-z]{2,4}\b/);
+            if (match) return match[0].toUpperCase();
+        }
+        return '';
+    }
+
+    getDescription(lines) {        const labels = [
             'opis placanja',
             'svrha placanja',
             'svrha uplate',

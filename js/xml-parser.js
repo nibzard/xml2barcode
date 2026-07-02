@@ -77,7 +77,8 @@ class XMLParser {
             reference: '',
 
             // Additional data
-            description: this.getTextContent(invoice, 'cbc:Note') || this.getTextContent(invoice, 'Note') || ''
+            description: this.getTextContent(invoice, 'cbc:Note') || this.getTextContent(invoice, 'Note') || '',
+            purposeCode: ''
         };
 
     // Parse payment ID into model and reference
